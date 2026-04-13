@@ -128,6 +128,13 @@
           </template>
         </UModal>
         <UButton
+          color="primary"
+          variant="soft"
+          icon="i-heroicons-window-20-solid"
+          label="Dashboard"
+          to="/tadash"
+        />
+        <UButton
           color="error"
           variant="soft"
           icon="i-heroicons-arrow-right-on-rectangle-20-solid"
