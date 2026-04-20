@@ -1,2 +1,94 @@
 @import 'tailwindcss';
 @import '@nuxt/ui';
+
+:root {
+  --resume-bg: #f3f3f3;
+  --resume-panel: #e6e6e6;
+  --resume-panel-strong: #d8d8d8;
+  --resume-border: #c7c7c7;
+  --resume-text: #222222;
+  --resume-muted: #8d8d8d;
+  --resume-sidebar: #4e7fe3;
+  --resume-sidebar-dark: #3f6fd1;
+  --resume-highlight: #a8d9d4;
+  --resume-accent: #4db56d;
+}
+
+body {
+  margin: 0;
+  background: var(--resume-bg);
+  color: var(--resume-text);
+  font-family: 'Trebuchet MS', 'Segoe UI', Verdana, sans-serif;
+}
+
+.resume-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 28%),
+    linear-gradient(135deg, #f8f8f8 0%, #ededed 100%);
+}
+
+.resume-sidebar {
+  background: linear-gradient(180deg, var(--resume-sidebar) 0%, var(--resume-sidebar-dark) 100%);
+  color: white;
+}
+
+.resume-card {
+  border: 1px solid var(--resume-border);
+  background: var(--resume-panel);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.resume-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.resume-table-header {
+  background: #bfbfbf;
+  font-weight: 700;
+}
+
+.resume-table-row:nth-child(even) {
+  background: #efefef;
+}
+
+.resume-table-row:nth-child(odd) {
+  background: #f8f8f8;
+}
+
+.resume-placeholder-row {
+  color: #555555;
+  background: #ececec;
+}
+
+.resume-button {
+  min-width: 132px;
+  border: 1px solid var(--resume-border);
+  background: #cfcfcf;
+  color: #111111;
+  font-weight: 700;
+  transition:
+    transform 120ms ease,
+    background-color 120ms ease;
+}
+
+.resume-button:hover {
+  background: #c3c3c3;
+  transform: translateY(-1px);
+}
+
+.resume-button--wide {
+  min-width: 150px;
+}
+
+.resume-link-muted {
+  color: #9f9f9f;
+  text-decoration: underline;
+}
+
+.resume-chevron {
+  color: var(--resume-accent);
+}
