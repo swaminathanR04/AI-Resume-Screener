@@ -3,7 +3,9 @@
     <UCard>
       <div class="space-y-7 p-4 text-[1.05rem] leading-6 sm:p-6">
         <div>
-          <h2 class="mb-4 text-xs font-bold tracking-[0.12em] text-[var(--ui-text-muted)] uppercase">
+          <h2
+            class="mb-4 text-xs font-bold tracking-[0.12em] text-[var(--ui-text-muted)] uppercase"
+          >
             AI Scoring Weights
           </h2>
           <div class="space-y-2 pl-5 text-[1.02rem] font-semibold text-[var(--ui-text)] sm:pl-10">

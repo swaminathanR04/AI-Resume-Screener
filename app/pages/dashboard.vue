@@ -144,7 +144,9 @@
                 Registered Users
               </h2>
             </div>
-            <UBadge variant="subtle" color="primary" size="md">{{ users?.length || 0 }} Users</UBadge>
+            <UBadge variant="subtle" color="primary" size="md"
+              >{{ users?.length || 0 }} Users</UBadge
+            >
           </div>
         </template>
 

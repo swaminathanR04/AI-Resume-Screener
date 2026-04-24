@@ -63,11 +63,11 @@
   }
 
   const colorModeIcon = computed(() =>
-    colorMode.value === 'dark' ? 'i-heroicons-sun-20-solid' : 'i-heroicons-moon-20-solid',
+    colorMode.value === 'dark' ? 'i-heroicons-sun-20-solid' : 'i-heroicons-moon-20-solid'
   )
 
   const colorModeLabel = computed(() =>
-    colorMode.value === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
+    colorMode.value === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
   )
 
   function toggleColorMode() {
@@ -132,7 +132,10 @@
                 class="flex items-center justify-between px-4 py-3 text-sm font-medium text-[var(--ui-text)]"
               >
                 <span>{{ section.label }}</span>
-                <UIcon name="i-heroicons-chevron-down-20-solid" class="h-4 w-4 text-[var(--ui-text-muted)]" />
+                <UIcon
+                  name="i-heroicons-chevron-down-20-solid"
+                  class="h-4 w-4 text-[var(--ui-text-muted)]"
+                />
               </div>
 
               <div
@@ -148,7 +151,9 @@
                       isSubItemActive(item)
                         ? 'bg-[var(--ui-bg)] font-medium text-[var(--ui-primary)]'
                         : 'hover:bg-[var(--ui-bg)]',
-                      !isSectionActive(section) ? 'text-[var(--ui-text-muted)]' : 'text-[var(--ui-text)]',
+                      !isSectionActive(section)
+                        ? 'text-[var(--ui-text-muted)]'
+                        : 'text-[var(--ui-text)]',
                     ]"
                   >
                     {{ item.label }}
@@ -162,7 +167,9 @@
                       isSubItemActive(item)
                         ? 'bg-[var(--ui-bg)] font-medium text-[var(--ui-primary)]'
                         : 'hover:bg-[var(--ui-bg)]',
-                      !isSectionActive(section) ? 'text-[var(--ui-text-muted)]' : 'text-[var(--ui-text)]',
+                      !isSectionActive(section)
+                        ? 'text-[var(--ui-text-muted)]'
+                        : 'text-[var(--ui-text)]',
                     ]"
                   >
                     {{ item.label }}
@@ -173,13 +180,17 @@
           </div>
         </nav>
 
-        <div class="border-t border-[var(--ui-border)] px-4 py-4 text-sm font-semibold text-[var(--ui-text-muted)]">
+        <div
+          class="border-t border-[var(--ui-border)] px-4 py-4 text-sm font-semibold text-[var(--ui-text-muted)]"
+        >
           AI Resume Screener
         </div>
       </aside>
 
       <main class="min-w-0 flex-1 bg-[var(--ui-bg-muted)]/40 px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
-        <div class="mx-auto max-w-6xl rounded-3xl border border-[var(--ui-border)] bg-[var(--ui-bg)] p-4 shadow-sm sm:p-6 lg:min-h-[calc(100vh-4rem)] lg:p-8">
+        <div
+          class="mx-auto max-w-6xl rounded-3xl border border-[var(--ui-border)] bg-[var(--ui-bg)] p-4 shadow-sm sm:p-6 lg:min-h-[calc(100vh-4rem)] lg:p-8"
+        >
           <div class="mb-6 border-b border-[var(--ui-border)] pb-4">
             <h1 class="text-3xl font-semibold tracking-tight text-[var(--ui-text)] sm:text-4xl">
               {{ title }}
