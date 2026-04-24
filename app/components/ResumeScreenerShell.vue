@@ -1,4 +1,6 @@
 <script setup lang="ts">
+  import { authClient } from '~/utils/auth-client'
+
   type SectionKey = 'resumes' | 'job-listings' | 'audit-log' | 'ai-config' | 'dashboard'
 
   type NavItem = {
@@ -21,6 +23,13 @@
 
   const colorMode = useColorMode()
 
+  const { data: session } = await useAsyncData('shell-session', async () => authClient.getSession())
+
+  const currentUser = computed(() => session.value?.data?.user)
+  const { displayName } = useProfileDisplayName(
+    computed(() => currentUser.value?.name || currentUser.value?.email || 'Admin User')
+  )
+
   const sections = computed<NavSection[]>(() => [
     {
       key: 'dashboard',
@@ -31,16 +40,19 @@
       key: 'resumes',
       label: 'Resumes',
       items: [
-        { label: 'All' },
-        { label: 'Accepted' },
-        { label: 'Rejected' },
-        { label: 'Archived' },
+        { label: 'All', to: '/allresumes' },
+        { label: 'Accepted', to: '/accepted' },
+        { label: 'Rejected', to: '/rejected' },
+        { label: 'Archived', to: '/archived' },
       ],
     },
     {
       key: 'job-listings',
       label: 'Job Listings',
-      items: [{ label: 'List' }, { label: 'Create New', to: '/job-listings/create' }],
+      items: [
+        { label: 'List', to: '/joblist' },
+        { label: 'Create New', to: '/job-listings/create' },
+      ],
     },
     {
       key: 'audit-log',
@@ -73,6 +85,14 @@
   function toggleColorMode() {
     colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
   }
+
+  function getProfileImageLink() {
+    if (!currentUser.value?.id || !currentUser.value?.image) {
+      return undefined
+    }
+
+    return `/api/users/${currentUser.value.id}/profile`
+  }
 </script>
 
 <template>
@@ -84,14 +104,19 @@
         <div class="border-b border-[var(--ui-border)] p-4 sm:p-5">
           <div class="flex items-start gap-3">
             <UAvatar
+              :src="getProfileImageLink()"
+              :alt="displayName"
               icon="i-heroicons-user-circle-20-solid"
               color="primary"
               variant="soft"
               size="lg"
+              :as="{ img: 'img' }"
             />
             <div class="min-w-0 leading-tight">
-              <p class="truncate text-sm font-semibold text-[var(--ui-text)]">Steve Jobs</p>
-              <p class="text-xs text-[var(--ui-text-muted)]">Admin</p>
+              <p class="truncate text-sm font-semibold text-[var(--ui-text)]">{{ displayName }}</p>
+              <p class="truncate text-xs text-[var(--ui-text-muted)]">
+                {{ currentUser?.email || 'Admin' }}
+              </p>
             </div>
           </div>
 

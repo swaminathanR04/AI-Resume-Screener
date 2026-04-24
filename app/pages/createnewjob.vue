@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  await navigateTo('/dashboard', { replace: true })
+  await navigateTo('/job-listings/create', { replace: true })
 </script>
 
 <template>
