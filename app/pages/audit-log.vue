@@ -48,9 +48,9 @@
 
 <template>
   <ResumeScreenerShell title="Audit Log" active-section="audit-log">
-    <section class="resume-card overflow-hidden">
+    <UCard class="overflow-hidden">
       <div
-        class="resume-table-header hidden grid-cols-[1.15fr_0.9fr_1.1fr_0.9fr_1.7fr] gap-4 px-3 py-2 text-sm md:grid"
+        class="hidden grid-cols-[1.15fr_0.9fr_1.1fr_0.9fr_1.7fr] gap-4 border-b border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-3 py-3 text-sm font-semibold text-[var(--ui-text)] md:grid"
       >
         <div>Date/Time</div>
         <div>User</div>
@@ -59,12 +59,16 @@
         <div>Details</div>
       </div>
 
-      <div class="resume-table-header px-3 py-2 text-sm md:hidden">Audit Events</div>
+      <div
+        class="border-b border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-3 py-3 text-sm font-semibold text-[var(--ui-text)] md:hidden"
+      >
+        Audit Events
+      </div>
 
       <div
         v-for="row in auditRows"
         :key="`${row.dateTime}-${row.action}`"
-        class="resume-table-row border-t border-white/60 px-3 py-2.5 text-[0.82rem] md:grid md:grid-cols-[1.15fr_0.9fr_1.1fr_0.9fr_1.7fr] md:gap-4"
+        class="border-b border-[var(--ui-border)] px-3 py-3 text-[0.82rem] text-[var(--ui-text)] odd:bg-[var(--ui-bg)] even:bg-[var(--ui-bg-elevated)] md:grid md:grid-cols-[1.15fr_0.9fr_1.1fr_0.9fr_1.7fr] md:gap-4"
       >
         <div class="font-semibold md:font-normal">{{ row.dateTime }}</div>
         <div>{{ row.user }}</div>
@@ -76,7 +80,7 @@
       <div
         v-for="(row, index) in placeholderRows"
         :key="`placeholder-${index}`"
-        class="resume-placeholder-row border-t border-white/50 px-3 py-2.5 text-[0.82rem] md:grid md:grid-cols-[1.15fr_0.9fr_1.1fr_0.9fr_1.7fr] md:gap-4"
+        class="border-b border-[var(--ui-border)] bg-[var(--ui-bg-muted)] px-3 py-3 text-[0.82rem] text-[var(--ui-text-muted)] md:grid md:grid-cols-[1.15fr_0.9fr_1.1fr_0.9fr_1.7fr] md:gap-4"
       >
         <div>{{ row.dateTime }}</div>
         <div>{{ row.user }}</div>
@@ -84,6 +88,6 @@
         <div>{{ row.item }}</div>
         <div>{{ row.details }}</div>
       </div>
-    </section>
+    </UCard>
   </ResumeScreenerShell>
 </template>

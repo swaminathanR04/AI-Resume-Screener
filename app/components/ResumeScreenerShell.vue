@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  type SectionKey = 'resumes' | 'job-listings' | 'audit-log' | 'ai-config'
+  type SectionKey = 'resumes' | 'job-listings' | 'audit-log' | 'ai-config' | 'dashboard'
 
   type NavItem = {
     label: string
@@ -19,7 +19,14 @@
     activeSubItem?: string
   }>()
 
+  const colorMode = useColorMode()
+
   const sections = computed<NavSection[]>(() => [
+    {
+      key: 'dashboard',
+      label: 'Dashboard',
+      to: '/dashboard',
+    },
     {
       key: 'resumes',
       label: 'Resumes',
@@ -54,87 +61,133 @@
   function isSubItemActive(item: NavItem) {
     return item.label === props.activeSubItem
   }
+
+  const colorModeIcon = computed(() =>
+    colorMode.value === 'dark' ? 'i-heroicons-sun-20-solid' : 'i-heroicons-moon-20-solid',
+  )
+
+  const colorModeLabel = computed(() =>
+    colorMode.value === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
+  )
+
+  function toggleColorMode() {
+    colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
+  }
 </script>
 
 <template>
-  <div class="resume-shell lg:flex">
-    <aside class="resume-sidebar flex w-full shrink-0 flex-col p-3 lg:min-h-screen lg:w-[155px]">
-      <div class="mb-5 flex items-start gap-3 border-b border-white/20 pb-4">
-        <div class="h-7 w-7 shrink-0 bg-white/95"></div>
-        <div class="leading-tight">
-          <p class="text-[0.95rem] font-semibold">Steve Jobs</p>
-          <p class="text-xs text-white/80">Admin</p>
-        </div>
-      </div>
-
-      <nav class="space-y-3">
-        <div
-          v-for="section in sections"
-          :key="section.key"
-          class="border border-black/10 bg-white/95 text-[#1d1d1d] shadow-[2px_2px_0_rgba(0,0,0,0.06)]"
-        >
-          <NuxtLink
-            v-if="section.to"
-            :to="section.to"
-            class="flex items-center justify-between px-3 py-2 text-[0.97rem]"
-            :class="isSectionActive(section) ? 'bg-[#a8d9d4]' : ''"
-          >
-            <span>{{ section.label }}</span>
-            <span class="resume-chevron text-xl leading-none">›</span>
-          </NuxtLink>
-
-          <div v-else>
-            <div class="flex items-center justify-between px-3 py-2 text-[0.97rem]">
-              <span>{{ section.label }}</span>
-              <span class="resume-chevron text-xl leading-none">⌄</span>
-            </div>
-
-            <div
-              class="space-y-0.5 border-t border-black/10 bg-[#e7e7e7] px-3 py-2 text-[0.85rem]"
-              :class="isSectionActive(section) ? '' : 'text-[#9c9c9c]'"
-            >
-              <template v-for="item in section.items" :key="item.label">
-                <NuxtLink
-                  v-if="item.to"
-                  :to="item.to"
-                  class="block w-full text-left hover:text-black"
-                  :class="[
-                    isSubItemActive(item) ? 'bg-[#c7ece8] px-1 text-black' : '',
-                    !isSectionActive(section) ? 'resume-link-muted' : '',
-                  ]"
-                >
-                  {{ item.label }}
-                </NuxtLink>
-
-                <button
-                  v-else
-                  type="button"
-                  class="block w-full text-left"
-                  :class="[
-                    isSubItemActive(item) ? 'bg-[#c7ece8] px-1 text-black' : '',
-                    !isSectionActive(section) ? 'resume-link-muted' : '',
-                  ]"
-                >
-                  {{ item.label }}
-                </button>
-              </template>
+  <div class="min-h-screen bg-[var(--ui-bg)] text-[var(--ui-text)]">
+    <div class="min-h-screen lg:flex">
+      <aside
+        class="flex w-full shrink-0 flex-col border-b border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] lg:min-h-screen lg:w-72 lg:border-r lg:border-b-0"
+      >
+        <div class="border-b border-[var(--ui-border)] p-4 sm:p-5">
+          <div class="flex items-start gap-3">
+            <UAvatar
+              icon="i-heroicons-user-circle-20-solid"
+              color="primary"
+              variant="soft"
+              size="lg"
+            />
+            <div class="min-w-0 leading-tight">
+              <p class="truncate text-sm font-semibold text-[var(--ui-text)]">Steve Jobs</p>
+              <p class="text-xs text-[var(--ui-text-muted)]">Admin</p>
             </div>
           </div>
+
+          <ClientOnly>
+            <UButton
+              class="mt-4 w-full justify-center"
+              color="neutral"
+              variant="soft"
+              :icon="colorModeIcon"
+              :label="colorModeLabel"
+              @click="toggleColorMode"
+            />
+          </ClientOnly>
         </div>
-      </nav>
 
-      <div class="mt-auto pt-6 text-[0.95rem] font-bold tracking-wide">LOGO</div>
-    </aside>
+        <nav class="flex-1 space-y-3 p-4">
+          <div
+            v-for="section in sections"
+            :key="section.key"
+            class="overflow-hidden rounded-xl border border-[var(--ui-border)] bg-[var(--ui-bg)] shadow-sm"
+          >
+            <NuxtLink
+              v-if="section.to"
+              :to="section.to"
+              class="flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors"
+              :class="
+                isSectionActive(section)
+                  ? 'border-l-4 border-[var(--ui-primary)] bg-[var(--ui-bg-elevated)] text-[var(--ui-primary)]'
+                  : 'text-[var(--ui-text)] hover:bg-[var(--ui-bg-muted)]'
+              "
+            >
+              <span>{{ section.label }}</span>
+              <UIcon name="i-heroicons-chevron-right-20-solid" class="h-4 w-4" />
+            </NuxtLink>
 
-    <main class="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-4 lg:py-4">
-      <div class="mx-auto max-w-6xl bg-white/55 p-2 lg:min-h-[calc(100vh-2rem)]">
-        <div class="px-2 py-1 sm:px-4 lg:px-3">
-          <h1 class="mb-4 text-3xl font-semibold tracking-tight text-[#111111] sm:text-[2.1rem]">
-            {{ title }}
-          </h1>
+            <div v-else>
+              <div
+                class="flex items-center justify-between px-4 py-3 text-sm font-medium text-[var(--ui-text)]"
+              >
+                <span>{{ section.label }}</span>
+                <UIcon name="i-heroicons-chevron-down-20-solid" class="h-4 w-4 text-[var(--ui-text-muted)]" />
+              </div>
+
+              <div
+                class="space-y-1 border-t border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-3 py-3 text-sm"
+                :class="!isSectionActive(section) ? 'text-[var(--ui-text-muted)]' : ''"
+              >
+                <template v-for="item in section.items" :key="item.label">
+                  <NuxtLink
+                    v-if="item.to"
+                    :to="item.to"
+                    class="block rounded-md px-2 py-1.5 transition-colors"
+                    :class="[
+                      isSubItemActive(item)
+                        ? 'bg-[var(--ui-bg)] font-medium text-[var(--ui-primary)]'
+                        : 'hover:bg-[var(--ui-bg)]',
+                      !isSectionActive(section) ? 'text-[var(--ui-text-muted)]' : 'text-[var(--ui-text)]',
+                    ]"
+                  >
+                    {{ item.label }}
+                  </NuxtLink>
+
+                  <button
+                    v-else
+                    type="button"
+                    class="block w-full rounded-md px-2 py-1.5 text-left transition-colors"
+                    :class="[
+                      isSubItemActive(item)
+                        ? 'bg-[var(--ui-bg)] font-medium text-[var(--ui-primary)]'
+                        : 'hover:bg-[var(--ui-bg)]',
+                      !isSectionActive(section) ? 'text-[var(--ui-text-muted)]' : 'text-[var(--ui-text)]',
+                    ]"
+                  >
+                    {{ item.label }}
+                  </button>
+                </template>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <div class="border-t border-[var(--ui-border)] px-4 py-4 text-sm font-semibold text-[var(--ui-text-muted)]">
+          AI Resume Screener
+        </div>
+      </aside>
+
+      <main class="min-w-0 flex-1 bg-[var(--ui-bg-muted)]/40 px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
+        <div class="mx-auto max-w-6xl rounded-3xl border border-[var(--ui-border)] bg-[var(--ui-bg)] p-4 shadow-sm sm:p-6 lg:min-h-[calc(100vh-4rem)] lg:p-8">
+          <div class="mb-6 border-b border-[var(--ui-border)] pb-4">
+            <h1 class="text-3xl font-semibold tracking-tight text-[var(--ui-text)] sm:text-4xl">
+              {{ title }}
+            </h1>
+          </div>
           <slot />
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   </div>
 </template>
