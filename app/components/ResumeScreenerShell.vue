@@ -1,7 +1,13 @@
 <script setup lang="ts">
   import { authClient } from '~/utils/auth-client'
 
-  type SectionKey = 'resumes' | 'job-listings' | 'audit-log' | 'ai-config' | 'dashboard'
+  type SectionKey =
+    | 'resumes'
+    | 'job-listings'
+    | 'audit-log'
+    | 'ai-config'
+    | 'dashboard'
+    | 'technical'
 
   type NavItem = {
     label: string
@@ -63,6 +69,17 @@
       key: 'ai-config',
       label: 'AI Config',
       to: '/ai-config',
+    },
+    {
+      key: 'technical',
+      label: 'Technical',
+      items: [
+        { label: 'Overview', to: '/technical' },
+        { label: 'Validation Center', to: '/technical/validation-center' },
+        { label: 'System Health', to: '/technical/system-health' },
+        { label: 'Processing Queue', to: '/technical/processing-queue' },
+        { label: 'Technical Audit Log', to: '/technical/audit-log' },
+      ],
     },
   ])
 
