@@ -3,18 +3,39 @@ import { prisma } from '../server/utils/prisma'
 async function main() {
   console.log('Start seeding...')
 
-  // Create a User
-  const user1 = await prisma.user.create({
-    data: {
-      name: "Sample Name", // modify this fit your needs
-      email: "email@example.com"
-    }
+  const adminUser = await prisma.user.upsert({
+    where: {
+      email: 'alice@example.com',
+    },
+    update: {
+      name: 'Alice',
+      emailVerified: true,
+    },
+    create: {
+      name: 'Alice',
+      email: 'alice@example.com',
+      emailVerified: true,
+    },
   })
 
-  console.log({ user1 })
+  const applicantUser = await prisma.user.upsert({
+    where: {
+      email: 'jamie.applicant@example.com',
+    },
+    update: {
+      name: 'Jamie Applicant',
+      emailVerified: true,
+    },
+    create: {
+      name: 'Jamie Applicant',
+      email: 'jamie.applicant@example.com',
+      emailVerified: true,
+    },
+  })
+
+  console.log({ adminUser, applicantUser })
   console.log('Seeding finished.')
 }
-// You can seed other models in your db as well depending on project needs
 
 main()
   .then(async () => {

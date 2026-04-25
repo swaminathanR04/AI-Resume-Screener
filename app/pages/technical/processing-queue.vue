@@ -33,7 +33,10 @@
 
   const queueStats = computed(() => [
     { label: 'Queued', value: queueItems.value.filter((item) => item.status === 'Queued').length },
-    { label: 'Running', value: queueItems.value.filter((item) => item.status === 'Running').length },
+    {
+      label: 'Running',
+      value: queueItems.value.filter((item) => item.status === 'Running').length,
+    },
     { label: 'Failed', value: queueItems.value.filter((item) => item.status === 'Failed').length },
   ])
 

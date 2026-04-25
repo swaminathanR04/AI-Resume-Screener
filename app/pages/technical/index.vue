@@ -42,7 +42,11 @@
 </script>
 
 <template>
-  <ResumeScreenerShell title="Technical Overview" active-section="technical" active-sub-item="Overview">
+  <ResumeScreenerShell
+    title="Technical Overview"
+    active-section="technical"
+    active-sub-item="Overview"
+  >
     <section class="space-y-6">
       <UCard>
         <div class="grid gap-6 p-4 lg:grid-cols-[1.1fr_0.9fr] lg:p-6">

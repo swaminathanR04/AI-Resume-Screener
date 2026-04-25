@@ -155,10 +155,15 @@
           </div>
 
           <div class="grid gap-4 lg:grid-cols-2">
-            <div class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] p-5">
+            <div
+              class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] p-5"
+            >
               <h3 class="text-lg font-semibold text-[var(--ui-text)]">Latest Check</h3>
               <div class="mt-4 space-y-3 text-sm text-[var(--ui-text-muted)]">
-                <div><span class="font-medium text-[var(--ui-text)]">File:</span> {{ latestCheck.file }}</div>
+                <div>
+                  <span class="font-medium text-[var(--ui-text)]">File:</span>
+                  {{ latestCheck.file }}
+                </div>
                 <div>
                   <span class="font-medium text-[var(--ui-text)]">File Type:</span>
                   {{ latestCheck.fileType }}
@@ -174,7 +179,9 @@
               </div>
             </div>
 
-            <div class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] p-5">
+            <div
+              class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] p-5"
+            >
               <h3 class="text-lg font-semibold text-[var(--ui-text)]">Error Rules</h3>
               <div class="mt-4 space-y-3 text-sm leading-6 text-[var(--ui-text-muted)]">
                 <div
