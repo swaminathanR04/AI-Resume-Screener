@@ -28,10 +28,11 @@
   }>()
 
   const colorMode = useColorMode()
+  const isMobileSidebarOpen = ref(false)
 
-  const { data: session } = await useAsyncData('shell-session', async () => authClient.getSession())
+  const { data: session } = await authClient.useSession(useFetch)
 
-  const currentUser = computed(() => session.value?.data?.user)
+  const currentUser = computed(() => session.value?.user)
   const { displayName } = useProfileDisplayName(
     computed(() => currentUser.value?.name || currentUser.value?.email || 'Admin User')
   )
@@ -103,6 +104,14 @@
     colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
   }
 
+  function toggleMobileSidebar() {
+    isMobileSidebarOpen.value = !isMobileSidebarOpen.value
+  }
+
+  function closeMobileSidebar() {
+    isMobileSidebarOpen.value = false
+  }
+
   function getProfileImageLink() {
     if (!currentUser.value?.id || !currentUser.value?.image) {
       return undefined
@@ -119,37 +128,54 @@
         class="flex w-full shrink-0 flex-col border-b border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] lg:min-h-screen lg:w-72 lg:border-r lg:border-b-0"
       >
         <div class="border-b border-[var(--ui-border)] p-4 sm:p-5">
-          <div class="flex items-start gap-3">
-            <UAvatar
-              :src="getProfileImageLink()"
-              :alt="displayName"
-              icon="i-heroicons-user-circle-20-solid"
-              color="primary"
-              variant="soft"
-              size="lg"
-              :as="{ img: 'img' }"
-            />
-            <div class="min-w-0 leading-tight">
-              <p class="truncate text-sm font-semibold text-[var(--ui-text)]">{{ displayName }}</p>
-              <p class="truncate text-xs text-[var(--ui-text-muted)]">
-                {{ currentUser?.email || 'Admin' }}
-              </p>
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex min-w-0 items-start gap-3">
+              <UAvatar
+                :src="getProfileImageLink()"
+                :alt="displayName"
+                icon="i-heroicons-user-circle-20-solid"
+                color="primary"
+                variant="soft"
+                size="lg"
+                :as="{ img: 'img' }"
+              />
+              <div class="min-w-0 leading-tight">
+                <p class="truncate text-sm font-semibold text-[var(--ui-text)]">{{ displayName }}</p>
+                <p class="truncate text-xs text-[var(--ui-text-muted)]">Admin</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <ClientOnly>
+                <UButton
+                  color="neutral"
+                  variant="soft"
+                  :icon="colorModeIcon"
+                  square
+                  :aria-label="colorModeLabel"
+                  @click="toggleColorMode"
+                />
+              </ClientOnly>
+
+              <UButton
+                class="lg:hidden"
+                color="neutral"
+                variant="soft"
+                :icon="
+                  isMobileSidebarOpen ? 'i-heroicons-x-mark-20-solid' : 'i-heroicons-bars-3-20-solid'
+                "
+                square
+                :aria-label="isMobileSidebarOpen ? 'Close navigation menu' : 'Open navigation menu'"
+                @click="toggleMobileSidebar"
+              />
             </div>
           </div>
-
-          <ClientOnly>
-            <UButton
-              class="mt-4 w-full justify-center"
-              color="neutral"
-              variant="soft"
-              :icon="colorModeIcon"
-              :label="colorModeLabel"
-              @click="toggleColorMode"
-            />
-          </ClientOnly>
         </div>
 
-        <nav class="flex-1 space-y-3 p-4">
+        <nav
+          class="flex-1 space-y-3 p-4"
+          :class="isMobileSidebarOpen ? 'block' : 'hidden lg:block'"
+        >
           <div
             v-for="section in sections"
             :key="section.key"
@@ -164,6 +190,7 @@
                   ? 'border-l-4 border-[var(--ui-primary)] bg-[var(--ui-bg-elevated)] text-[var(--ui-primary)]'
                   : 'text-[var(--ui-text)] hover:bg-[var(--ui-bg-muted)]'
               "
+              @click="closeMobileSidebar"
             >
               <span>{{ section.label }}</span>
               <UIcon name="i-heroicons-chevron-right-20-solid" class="h-4 w-4" />
@@ -197,6 +224,7 @@
                         ? 'text-[var(--ui-text-muted)]'
                         : 'text-[var(--ui-text)]',
                     ]"
+                    @click="closeMobileSidebar"
                   >
                     {{ item.label }}
                   </NuxtLink>
@@ -224,6 +252,7 @@
 
         <div
           class="border-t border-[var(--ui-border)] px-4 py-4 text-sm font-semibold text-[var(--ui-text-muted)]"
+          :class="isMobileSidebarOpen ? 'block' : 'hidden lg:block'"
         >
           AI Resume Screener
         </div>

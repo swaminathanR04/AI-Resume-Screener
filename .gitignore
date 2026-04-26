@@ -25,3 +25,4 @@ logs
 
 /prisma/generated
 /dev.db
+/server/uploads

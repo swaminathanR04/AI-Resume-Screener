@@ -2,6 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import { prisma } from '~~/server/utils/prisma'
 import { auth } from '~~/server/utils/auth'
+import { getUploadStoragePath } from '~~/server/utils/upload-storage'
 
 export default defineEventHandler(async (event) => {
   const session = await auth.api.getSession({
@@ -25,7 +26,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const dirPath = path.join(
-    process.env.UPLOAD_STORAGE_PATH || 'public/images',
+    getUploadStoragePath(),
     'users',
     session.user.id,
     'images'

@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { getUploadStoragePath } from '~~/server/utils/upload-storage'
 
 export default defineEventHandler(async (event) => {
   const session = await auth.api.getSession({
@@ -27,7 +28,7 @@ export default defineEventHandler(async (event) => {
 
   const imagePath = record?.image
 
-  const filePath = path.join(process.env.UPLOAD_STORAGE_PATH || 'public/images', imagePath || 'null')
+  const filePath = path.join(getUploadStoragePath(), imagePath || 'null')
 
   if (!fs.existsSync(filePath)) {
     throw createError({ statusCode: 404, statusMessage: 'File not found' })

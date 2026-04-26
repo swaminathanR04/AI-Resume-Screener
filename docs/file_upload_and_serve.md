@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
 
   // Create user-specific directory structure
   const dirPath = path.join(
-    process.env.UPLOAD_STORAGE_PATH || 'public/images',
+    process.env.UPLOAD_STORAGE_PATH || path.join(process.cwd(), '.data', 'uploads'),
     'users',
     session.user.id,
     'images'
@@ -94,7 +94,10 @@ export default defineEventHandler(async (event) => {
   }
 
   // Construct full file path
-  const filePath = path.join(process.env.UPLOAD_STORAGE_PATH || 'public/images', imagePath)
+  const filePath = path.join(
+    process.env.UPLOAD_STORAGE_PATH || path.join(process.cwd(), '.data', 'uploads'),
+    imagePath
+  )
 
   // Verify file exists
   if (!fs.existsSync(filePath)) {
@@ -136,7 +139,7 @@ Set the upload storage path in your environment (and use this as the base path f
 
 ```bash
 UPLOAD_STORAGE_PATH=/path/to/your/storage
-# Defaults to: public/images
+# Defaults to: .data/uploads under the server working directory
 ```
 
 ## Frontend File Validation

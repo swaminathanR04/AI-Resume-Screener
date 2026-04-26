@@ -18,6 +18,21 @@ async function main() {
     },
   })
 
+  const bobUser = await prisma.user.upsert({
+    where: {
+      email: 'bob@example.com',
+    },
+    update: {
+      name: 'Bob',
+      emailVerified: true,
+    },
+    create: {
+      name: 'Bob',
+      email: 'bob@example.com',
+      emailVerified: true,
+    },
+  })
+
   const applicantUser = await prisma.user.upsert({
     where: {
       email: 'jamie.applicant@example.com',
@@ -33,7 +48,7 @@ async function main() {
     },
   })
 
-  console.log({ adminUser, applicantUser })
+  console.log({ adminUser, bobUser, applicantUser })
   console.log('Seeding finished.')
 }
 

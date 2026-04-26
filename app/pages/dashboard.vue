@@ -2,9 +2,7 @@
   import { authClient } from '../utils/auth-client'
 
   const { data: users, pending, error } = await useFetch('/api/users')
-  const { data: session } = await useAsyncData('dashboard-session', async () =>
-    authClient.getSession()
-  )
+  const { data: session } = await authClient.useSession(useFetch)
 
   const selectedFile = ref<File | null>(null)
   const imagePreview = ref<string>('')
@@ -12,7 +10,7 @@
   const isModalOpen = ref(false)
   const sampleResumePdfPath = '/sample-resume.pdf'
 
-  const currentUser = computed(() => session.value?.data?.user)
+  const currentUser = computed(() => session.value?.user)
   const { displayName } = useProfileDisplayName(
     computed(() => currentUser.value?.name || currentUser.value?.email || 'Admin User')
   )
@@ -126,7 +124,7 @@
             </p>
           </div>
 
-          <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <div
               class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] p-4"
             >
@@ -145,16 +143,6 @@
               </p>
               <p class="mt-2 text-3xl font-semibold text-[var(--ui-text)]">
                 {{ inboxPlaceholders.length }}
-              </p>
-            </div>
-            <div
-              class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] p-4"
-            >
-              <p class="text-xs tracking-[0.12em] text-[var(--ui-text-muted)] uppercase">
-                Resume Flow
-              </p>
-              <p class="mt-2 text-sm font-medium text-[var(--ui-text)]">
-                All / Accepted / Rejected / Archived
               </p>
             </div>
           </div>

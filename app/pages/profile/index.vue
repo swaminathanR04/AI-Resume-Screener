@@ -2,12 +2,13 @@
   import { authClient } from '../../utils/auth-client'
 
   const toast = useToast()
-  const { data: session } = await useAsyncData('profile-session', async () =>
-    authClient.getSession()
-  )
+  const { data: session } = await authClient.useSession(useFetch)
   const { profile } = useApplicantPortal()
 
-  const currentUser = computed(() => session.value?.data?.user)
+  const currentUser = computed(() => session.value?.user)
+  const { displayName } = useProfileDisplayName(
+    computed(() => currentUser.value?.name || currentUser.value?.email || 'Applicant User')
+  )
   const selectedFile = ref<File | null>(null)
   const imagePreview = ref('')
   const isUploading = ref(false)
@@ -92,7 +93,7 @@
           <div class="flex items-center gap-4">
             <UAvatar
               :src="imagePreview || getProfileImageLink()"
-              :alt="currentUser?.name || 'Applicant User'"
+              :alt="displayName"
               icon="i-heroicons-user-circle-20-solid"
               color="primary"
               variant="soft"
@@ -101,7 +102,7 @@
             />
             <div>
               <p class="text-2xl font-semibold text-[var(--ui-text)]">
-                {{ currentUser?.name || 'Applicant User' }}
+                {{ displayName }}
               </p>
               <p class="text-sm text-[var(--ui-text-muted)]">{{ currentUser?.email }}</p>
             </div>

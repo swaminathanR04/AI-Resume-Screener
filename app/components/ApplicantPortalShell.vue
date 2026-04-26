@@ -8,11 +8,9 @@
 
   const colorMode = useColorMode()
 
-  const { data: session } = await useAsyncData('applicant-shell-session', async () =>
-    authClient.getSession()
-  )
+  const { data: session } = await authClient.useSession(useFetch)
 
-  const currentUser = computed(() => session.value?.data?.user)
+  const currentUser = computed(() => session.value?.user)
   const { displayName } = useProfileDisplayName(
     computed(() => currentUser.value?.name || currentUser.value?.email || 'Applicant User')
   )
@@ -68,9 +66,7 @@
           />
           <div>
             <p class="text-sm font-semibold text-[var(--ui-text)]">{{ displayName }}</p>
-            <p class="text-xs text-[var(--ui-text-muted)]">
-              {{ currentUser?.email || 'Applicant' }}
-            </p>
+            <p class="text-xs text-[var(--ui-text-muted)]">Applicant</p>
           </div>
           <UBadge color="primary" variant="soft">Applicant</UBadge>
         </div>
