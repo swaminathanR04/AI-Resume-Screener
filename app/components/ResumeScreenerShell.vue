@@ -47,7 +47,7 @@
       key: 'resumes',
       label: 'Resumes',
       items: [
-        { label: 'All', to: '/allresumes' },
+        { label: 'New Resumes', to: '/allresumes' },
         { label: 'Accepted', to: '/accepted' },
         { label: 'Rejected', to: '/rejected' },
         { label: 'Archived', to: '/archived' },
@@ -140,7 +140,9 @@
                 :as="{ img: 'img' }"
               />
               <div class="min-w-0 leading-tight">
-                <p class="truncate text-sm font-semibold text-[var(--ui-text)]">{{ displayName }}</p>
+                <p class="truncate text-sm font-semibold text-[var(--ui-text)]">
+                  {{ displayName }}
+                </p>
                 <p class="truncate text-xs text-[var(--ui-text-muted)]">Admin</p>
               </div>
             </div>
@@ -162,7 +164,9 @@
                 color="neutral"
                 variant="soft"
                 :icon="
-                  isMobileSidebarOpen ? 'i-heroicons-x-mark-20-solid' : 'i-heroicons-bars-3-20-solid'
+                  isMobileSidebarOpen
+                    ? 'i-heroicons-x-mark-20-solid'
+                    : 'i-heroicons-bars-3-20-solid'
                 "
                 square
                 :aria-label="isMobileSidebarOpen ? 'Close navigation menu' : 'Open navigation menu'"

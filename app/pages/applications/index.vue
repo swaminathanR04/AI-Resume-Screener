@@ -1,15 +1,13 @@
 <script setup lang="ts">
   const toast = useToast()
-  const { activeApplications, inactiveApplications, withdrawApplication } = useApplicantPortal()
+  const { applications, withdrawApplication } = await useApplicantApplications()
 
-  function withdraw(id: number) {
-    if (!withdrawApplication(id)) {
-      return
-    }
+  async function withdraw(id: number) {
+    await withdrawApplication(id)
 
     toast.add({
       title: 'Application withdrawn',
-      description: 'The application was moved to your inactive list.',
+      description: 'This application was removed from your submissions.',
       color: 'warning',
     })
   }
@@ -17,11 +15,11 @@
 
 <template>
   <ApplicantPortalShell title="Applications" active-path="/applications">
-    <section class="space-y-8">
+    <section class="space-y-6">
       <div>
-        <h2 class="mb-3 text-lg font-semibold text-[var(--ui-text)]">Active Applications</h2>
+        <h2 class="mb-3 text-lg font-semibold text-[var(--ui-text)]">Submitted Applications</h2>
         <div class="space-y-3">
-          <UCard v-for="application in activeApplications" :key="application.id">
+          <UCard v-for="application in applications" :key="application.id">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p class="font-semibold text-[var(--ui-text)]">{{ application.title }}</p>
@@ -29,8 +27,8 @@
               </div>
 
               <div class="text-sm text-[var(--ui-text-muted)]">
-                <p>Status: {{ application.status }}</p>
-                <p>Applied on {{ application.applied }}</p>
+                <p>Submitted: {{ new Date(application.appliedAt).toLocaleDateString() }}</p>
+                <p>Resume: {{ application.resumePath ? 'On file' : 'Missing' }}</p>
               </div>
 
               <div class="flex flex-wrap gap-3 text-sm">
@@ -38,7 +36,7 @@
                   :to="`/applications/${application.id}`"
                   color="primary"
                   variant="soft"
-                  label="Edit/View Application"
+                  label="View Submission"
                 />
                 <UButton
                   color="error"
@@ -50,38 +48,10 @@
             </div>
           </UCard>
 
-          <UCard v-if="activeApplications.length === 0">
-            <div class="py-4 text-sm text-[var(--ui-text-muted)]">No active applications yet.</div>
-          </UCard>
-        </div>
-      </div>
-
-      <div>
-        <h2 class="mb-3 text-lg font-semibold text-[var(--ui-text)]">Inactive Applications</h2>
-        <div class="space-y-3">
-          <UCard v-for="application in inactiveApplications" :key="application.id">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p class="font-semibold text-[var(--ui-text)]">{{ application.title }}</p>
-                <p class="text-sm text-[var(--ui-text-muted)]">{{ application.location }}</p>
-              </div>
-
-              <div class="text-sm text-[var(--ui-text-muted)]">
-                <p>Status: {{ application.status }}</p>
-                <p>Applied on {{ application.applied }}</p>
-              </div>
-
-              <UButton
-                :to="`/applications/${application.id}`"
-                color="neutral"
-                variant="soft"
-                label="View Application"
-              />
+          <UCard v-if="applications.length === 0">
+            <div class="py-4 text-sm text-[var(--ui-text-muted)]">
+              You have not submitted any applications yet.
             </div>
-          </UCard>
-
-          <UCard v-if="inactiveApplications.length === 0">
-            <div class="py-4 text-sm text-[var(--ui-text-muted)]">No inactive applications.</div>
           </UCard>
         </div>
       </div>

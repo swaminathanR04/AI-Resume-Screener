@@ -25,12 +25,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'File missing' })
   }
 
-  const dirPath = path.join(
-    getUploadStoragePath(),
-    'users',
-    session.user.id,
-    'images'
-  )
+  const dirPath = path.join(getUploadStoragePath(), 'users', session.user.id, 'images')
 
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true })

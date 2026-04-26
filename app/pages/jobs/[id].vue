@@ -2,7 +2,8 @@
   const route = useRoute()
   const jobId = computed(() => Number(route.params.id))
 
-  const { getJob, getApplicationByJob } = useApplicantPortal()
+  const { getJob } = await useApplicantJobListings()
+  const { getApplicationByJob } = await useApplicantApplications()
 
   const job = computed(() => getJob(jobId.value))
   const application = computed(() => getApplicationByJob(jobId.value))
@@ -21,9 +22,7 @@
 
             <div class="flex flex-wrap items-center gap-2">
               <UBadge color="primary" variant="soft">{{ job.employmentType }}</UBadge>
-              <UBadge v-if="application" color="success" variant="soft">{{
-                application.status
-              }}</UBadge>
+              <UBadge v-if="application" color="success" variant="soft">Applied</UBadge>
             </div>
           </div>
 
@@ -34,7 +33,7 @@
               v-if="application"
               :to="`/applications/${application.id}`"
               color="primary"
-              label="View Application"
+              label="View Submission"
             />
             <UButton
               v-else

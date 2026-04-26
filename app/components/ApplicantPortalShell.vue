@@ -17,6 +17,7 @@
 
   const navItems = [
     { label: 'Jobs', to: '/jobs' },
+    { label: 'Resume', to: '/resume' },
     { label: 'Notifications', to: '/notifications' },
     { label: 'Applications', to: '/applications' },
     { label: 'Profile', to: '/profile' },
@@ -68,7 +69,6 @@
             <p class="text-sm font-semibold text-[var(--ui-text)]">{{ displayName }}</p>
             <p class="text-xs text-[var(--ui-text-muted)]">Applicant</p>
           </div>
-          <UBadge color="primary" variant="soft">Applicant</UBadge>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">

@@ -8,15 +8,16 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
+  id            String         @id @default(uuid())
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean        @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   sessions      Session[]
   accounts      Account[]
+  applicantInfo ApplicantInfo?
 
   @@unique([email])
   @@map("user")
@@ -68,4 +69,44 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model JobListing {
+  id             Int                   @id @default(autoincrement())
+  jobTitle       String
+  location       String
+  employmentType String
+  jobDescription String
+  requiredSkills String
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  applicants     ApplicantJobListing[]
+
+  @@map("Job_Listings")
+}
+
+model ApplicantInfo {
+  id           Int                   @id @default(autoincrement())
+  userId       String                @unique
+  name         String
+  phoneNumber  String?
+  resumePath   String?
+  user         User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications ApplicantJobListing[]
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  @@map("Applicant_Info")
+}
+
+model ApplicantJobListing {
+  applicantInfoId Int
+  jobListingId    Int
+  appliedAt       DateTime      @default(now())
+  applicantInfo   ApplicantInfo @relation(fields: [applicantInfoId], references: [id], onDelete: Cascade)
+  jobListing      JobListing    @relation(fields: [jobListingId], references: [id], onDelete: Cascade)
+
+  @@id([applicantInfoId, jobListingId])
+  @@index([jobListingId])
+  @@map("Applicant_Job_Listings")
 }

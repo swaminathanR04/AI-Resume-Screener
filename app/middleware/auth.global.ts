@@ -15,7 +15,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     '/technical',
   ]
 
-  const applicantRoutePrefixes = ['/jobs', '/applications', '/notifications', '/profile']
+  const applicantRoutePrefixes = ['/jobs', '/resume', '/applications', '/notifications', '/profile']
 
   const { data: session } = await authClient.useSession(useFetch)
   const currentUser = session.value?.user
@@ -30,6 +30,21 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (to.path === '/' || to.path === '/auth') {
     return navigateTo(getUserHomePath(currentUser), { replace: true })
+  }
+
+  if (!isAdminUser(currentUser)) {
+    const onboarding = await $fetch<{ isComplete: boolean }>('/api/applicants/onboarding', {
+      headers: process.server ? useRequestHeaders(['cookie']) : undefined,
+    })
+    const isOnboardingComplete = Boolean(onboarding.isComplete)
+
+    if (!isOnboardingComplete && to.path !== '/onboarding') {
+      return navigateTo('/onboarding')
+    }
+
+    if (isOnboardingComplete && to.path === '/onboarding') {
+      return navigateTo('/jobs', { replace: true })
+    }
   }
 
   const isAdminRoute = adminRoutePrefixes.some((prefix) => to.path.startsWith(prefix))

@@ -3,7 +3,12 @@
 
   const toast = useToast()
   const { data: session } = await authClient.useSession(useFetch)
-  const { profile } = useApplicantPortal()
+  const { data: applicantInfo } = await useFetch<{
+    name: string
+    phoneNumber: string | null
+    resumePath: string | null
+    applications: Array<{ jobListingId: number; appliedAt: string }>
+  }>('/api/applicants/me')
 
   const currentUser = computed(() => session.value?.user)
   const { displayName } = useProfileDisplayName(
@@ -147,37 +152,19 @@
         </div>
       </UCard>
 
-      <div class="grid gap-6 lg:grid-cols-2">
+      <div class="grid gap-6">
         <UCard>
           <template #header>
             <h2 class="text-lg font-semibold text-[var(--ui-text)]">Contact</h2>
           </template>
           <div class="space-y-3 text-sm text-[var(--ui-text-muted)]">
             <div>
-              <span class="font-medium text-[var(--ui-text)]">Phone:</span> {{ profile.phone }}
+              <span class="font-medium text-[var(--ui-text)]">Name:</span> {{ displayName }}
             </div>
             <div>
-              <span class="font-medium text-[var(--ui-text)]">Address:</span> {{ profile.address }}
+              <span class="font-medium text-[var(--ui-text)]">Phone Number:</span>
+              {{ applicantInfo?.phoneNumber || 'Not provided' }}
             </div>
-            <div>
-              <span class="font-medium text-[var(--ui-text)]">Education:</span>
-              {{ profile.education }}
-            </div>
-            <div>
-              <span class="font-medium text-[var(--ui-text)]">Expected Graduation:</span>
-              {{ profile.graduation }}
-            </div>
-          </div>
-        </UCard>
-
-        <UCard>
-          <template #header>
-            <h2 class="text-lg font-semibold text-[var(--ui-text)]">Skills</h2>
-          </template>
-          <div class="flex flex-wrap gap-2">
-            <UBadge v-for="skill in profile.skills" :key="skill" color="primary" variant="soft">
-              {{ skill }}
-            </UBadge>
           </div>
         </UCard>
       </div>

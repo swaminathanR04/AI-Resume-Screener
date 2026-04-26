@@ -3,25 +3,26 @@
   const route = useRoute()
   const applicationId = computed(() => Number(route.params.id))
 
-  const { getApplication, getJob, withdrawApplication } = useApplicantPortal()
+  const { getApplication, withdrawApplication } = await useApplicantApplications()
+  const { getJob } = await useApplicantJobListings()
 
   const application = computed(() => getApplication(applicationId.value))
   const job = computed(() => getJob(application.value?.jobId || 0))
 
-  function withdraw() {
+  async function withdraw() {
     if (!application.value) {
       return
     }
 
-    if (!withdrawApplication(application.value.id)) {
-      return
-    }
+    await withdrawApplication(application.value.id)
 
     toast.add({
       title: 'Application withdrawn',
-      description: 'This application is now marked as withdrawn.',
+      description: 'This application was removed from your submissions.',
       color: 'warning',
     })
+
+    await navigateTo('/applications')
   }
 </script>
 
@@ -39,8 +40,7 @@
           </div>
 
           <div class="space-y-2 text-sm text-[var(--ui-text-muted)] sm:text-right">
-            <p>Status: {{ application.status }}</p>
-            <p>Applied on {{ application.applied }}</p>
+            <p>Submitted on {{ new Date(application.appliedAt).toLocaleDateString() }}</p>
             <div class="flex flex-wrap justify-end gap-2">
               <UButton
                 v-if="job"
@@ -49,13 +49,7 @@
                 variant="soft"
                 label="View Job"
               />
-              <UButton
-                color="error"
-                variant="soft"
-                label="Withdraw"
-                :disabled="application.status === 'Withdrawn'"
-                @click="withdraw"
-              />
+              <UButton color="error" variant="soft" label="Withdraw" @click="withdraw" />
             </div>
           </div>
         </div>
@@ -64,66 +58,67 @@
       <div class="grid gap-6 xl:grid-cols-3">
         <UCard>
           <template #header>
-            <h2 class="text-lg font-semibold text-[var(--ui-text)]">Applicant Information</h2>
+            <h2 class="text-lg font-semibold text-[var(--ui-text)]">Submission Summary</h2>
           </template>
           <div class="space-y-3 text-sm text-[var(--ui-text-muted)]">
             <div>
-              <span class="font-medium text-[var(--ui-text)]">Name:</span>
-              {{ application.fullName }}
+              <span class="font-medium text-[var(--ui-text)]">Role:</span>
+              {{ application.title }}
             </div>
             <div>
               <span class="font-medium text-[var(--ui-text)]">Location:</span>
-              {{ application.currentLocation }}
+              {{ application.location }}
             </div>
             <div>
-              <span class="font-medium text-[var(--ui-text)]">Email:</span> {{ application.email }}
+              <span class="font-medium text-[var(--ui-text)]">Employment Type:</span>
+              {{ application.employmentType }}
             </div>
             <div>
-              <span class="font-medium text-[var(--ui-text)]">Phone:</span> {{ application.phone }}
-            </div>
-            <div>
-              <span class="font-medium text-[var(--ui-text)]">Education:</span>
-              {{ application.education }}
-            </div>
-            <div>
-              <span class="font-medium text-[var(--ui-text)]">Expected Graduation:</span>
-              {{ application.graduation }}
+              <span class="font-medium text-[var(--ui-text)]">Submitted:</span>
+              {{ new Date(application.appliedAt).toLocaleString() }}
             </div>
           </div>
         </UCard>
 
         <UCard>
           <template #header>
-            <h2 class="text-lg font-semibold text-[var(--ui-text)]">Experience & Questions</h2>
+            <h2 class="text-lg font-semibold text-[var(--ui-text)]">Resume</h2>
           </template>
           <div class="space-y-4 text-sm text-[var(--ui-text-muted)]">
             <div>
-              <p class="font-medium text-[var(--ui-text)]">Experience</p>
-              <p class="mt-1 leading-6">{{ application.experience }}</p>
+              <p class="font-medium text-[var(--ui-text)]">Submitted document</p>
+              <p class="mt-1 leading-6">
+                This application uses the resume currently saved on your applicant profile.
+              </p>
             </div>
-            <div>
-              <p class="font-medium text-[var(--ui-text)]">Questions</p>
-              <div class="mt-2 space-y-1">
-                <div>Authorized to work? {{ application.answers.workAuthorization }}</div>
-                <div>Need sponsorship? {{ application.answers.sponsorship }}</div>
-                <div>Can commute? {{ application.answers.commute }}</div>
-                <div>Veteran? {{ application.answers.veteran }}</div>
-                <div>Disability? {{ application.answers.disability }}</div>
-              </div>
+            <div class="flex flex-wrap gap-3">
+              <UButton
+                v-if="application.resumePath"
+                to="/api/applicants/resume"
+                target="_blank"
+                color="primary"
+                variant="soft"
+                label="Open Resume"
+              />
+              <UButton to="/resume" color="neutral" variant="soft" label="Manage Resume" />
             </div>
           </div>
         </UCard>
 
         <UCard>
           <template #header>
-            <h2 class="text-lg font-semibold text-[var(--ui-text)]">Documents & Skills</h2>
+            <h2 class="text-lg font-semibold text-[var(--ui-text)]">Job Details</h2>
           </template>
           <div class="space-y-4 text-sm text-[var(--ui-text-muted)]">
             <div>
-              <p class="font-medium text-[var(--ui-text)]">Skills</p>
+              <p class="font-medium text-[var(--ui-text)]">Description</p>
+              <p class="mt-1 leading-6">{{ job?.description || 'Job details unavailable.' }}</p>
+            </div>
+            <div v-if="job?.qualifications?.length">
+              <p class="font-medium text-[var(--ui-text)]">Required Skills</p>
               <div class="mt-2 flex flex-wrap gap-2">
                 <UBadge
-                  v-for="skill in application.skills"
+                  v-for="skill in job.qualifications"
                   :key="skill"
                   color="primary"
                   variant="soft"
@@ -131,18 +126,6 @@
                   {{ skill }}
                 </UBadge>
               </div>
-            </div>
-            <div>
-              <p class="font-medium text-[var(--ui-text)]">Resume</p>
-              <p class="mt-1">{{ application.resumeFileName }}</p>
-            </div>
-            <div>
-              <p class="font-medium text-[var(--ui-text)]">Cover Letter</p>
-              <p class="mt-1">{{ application.coverLetterFileName }}</p>
-            </div>
-            <div>
-              <p class="font-medium text-[var(--ui-text)]">Why you are a fit</p>
-              <p class="mt-1 leading-6">{{ application.fitSummary }}</p>
             </div>
           </div>
         </UCard>
