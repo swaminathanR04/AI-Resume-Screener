@@ -62,6 +62,57 @@ function stripCodeFences(value: string) {
     .trim()
 }
 
+function coerceAiList(value: unknown) {
+  if (Array.isArray(value)) {
+    return value
+      .filter((item): item is string => typeof item === 'string')
+      .map((item) => item.trim())
+  }
+
+  if (typeof value !== 'string') {
+    return []
+  }
+
+  const trimmed = value.trim()
+
+  if (!trimmed) {
+    return []
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed)
+
+    if (Array.isArray(parsed)) {
+      return parsed
+        .filter((item): item is string => typeof item === 'string')
+        .map((item) => item.trim())
+        .filter(Boolean)
+    }
+  } catch {
+    // Fall through to delimiter-based parsing.
+  }
+
+  return trimmed
+    .split(/\s*[;,\n]\s*/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function normalizeAiScorePayload(payload: unknown) {
+  if (!payload || typeof payload !== 'object') {
+    return payload
+  }
+
+  const candidate = payload as Record<string, unknown>
+
+  return {
+    ...candidate,
+    matchedSkills: coerceAiList(candidate.matchedSkills),
+    missingSkills: coerceAiList(candidate.missingSkills),
+    concerns: coerceAiList(candidate.concerns),
+  }
+}
+
 export function serializeAiList(items: string[]) {
   return JSON.stringify(items)
 }
@@ -129,7 +180,9 @@ export async function scoreResumeAgainstJob(input: ScoreResumeInput) {
       throw new Error('Ollama scoring did not return any content.')
     }
 
-    const parsed = aiScoreSchema.parse(JSON.parse(stripCodeFences(content)))
+    const parsed = aiScoreSchema.parse(
+      normalizeAiScorePayload(JSON.parse(stripCodeFences(content)))
+    )
 
     return {
       ...parsed,
@@ -187,7 +240,7 @@ export async function scoreResumeAgainstJob(input: ScoreResumeInput) {
     throw new Error('AI scoring did not return any content.')
   }
 
-  const parsed = aiScoreSchema.parse(JSON.parse(stripCodeFences(content)))
+  const parsed = aiScoreSchema.parse(normalizeAiScorePayload(JSON.parse(stripCodeFences(content))))
 
   return {
     ...parsed,
