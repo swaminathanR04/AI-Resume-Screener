@@ -1,6 +1,8 @@
 <script setup lang="ts">
   const toast = useToast()
-  const { newResumes, pending, error, refreshResumes, moveResume } = await useAdminResumes()
+  const isRescoring = ref<string | null>(null)
+  const { newResumes, pending, error, refreshResumes, moveResume, rescoreResume } =
+    await useAdminResumes()
 
   function advanceResume(userId: string, applicantName: string) {
     if (!moveResume(userId, 'accepted')) {
@@ -24,6 +26,34 @@
       description: `${applicantName} was moved to Rejected.`,
       color: 'warning',
     })
+  }
+
+  async function handleRescore(userId: string, applicantName: string) {
+    isRescoring.value = userId
+
+    try {
+      const result = await rescoreResume(userId)
+
+      toast.add({
+        title: 'Resume re-scored',
+        description:
+          result.score === null
+            ? `${applicantName} was re-scored, but no AI score is available because the model is not configured.`
+            : `${applicantName} now has an AI match score of ${result.score}/10.`,
+        color: result.score === null ? 'warning' : 'success',
+      })
+    } catch (error) {
+      const description =
+        error instanceof Error ? error.message : 'Unable to re-score this resume right now.'
+
+      toast.add({
+        title: 'Re-score failed',
+        description,
+        color: 'error',
+      })
+    } finally {
+      isRescoring.value = null
+    }
   }
 </script>
 
@@ -85,7 +115,7 @@
                   Ranking
                 </span>
                 <span class="text-base font-semibold text-[var(--ui-primary)]">
-                  {{ resume.score.toFixed(1) }}/10
+                  {{ resume.score === null ? 'Pending' : `${resume.score.toFixed(1)}/10` }}
                 </span>
               </div>
               <UButton
@@ -94,6 +124,14 @@
                 color="primary"
                 variant="soft"
                 label="Open Resume"
+              />
+              <UButton
+                color="neutral"
+                variant="soft"
+                label="Re-score"
+                :loading="isRescoring === resume.userId"
+                :disabled="resume.applicationCount === 0"
+                @click="handleRescore(resume.userId, resume.applicantName)"
               />
               <div class="flex flex-wrap justify-end gap-2">
                 <UButton

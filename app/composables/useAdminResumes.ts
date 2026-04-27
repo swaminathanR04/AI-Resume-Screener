@@ -5,7 +5,18 @@ export type AdminResumeItem = {
   appliedRole: string
   submittedAt: string
   applicationCount: number
-  score: number
+  score: number | null
+}
+
+type RescoreResumeResponse = {
+  userId: string
+  score: number | null
+  aiSummary: string | null
+  aiMatchedSkills: string[]
+  aiMissingSkills: string[]
+  aiConcerns: string[]
+  aiScoredAt: string | null
+  aiModel: string | null
 }
 
 function sortResumes(items: AdminResumeItem[]) {
@@ -15,17 +26,17 @@ function sortResumes(items: AdminResumeItem[]) {
 }
 
 export async function useAdminResumes() {
+  const isInitialized = useState<boolean>('admin-resumes-initialized', () => false)
+  const newResumes = useState<AdminResumeItem[]>('admin-new-resumes', () => [])
+  const acceptedResumes = useState<AdminResumeItem[]>('admin-accepted-resumes', () => [])
+  const rejectedResumes = useState<AdminResumeItem[]>('admin-rejected-resumes', () => [])
+
   const { data, pending, error, refresh } = await useFetch<AdminResumeItem[]>(
     '/api/admin/resumes',
     {
       key: 'admin-resumes',
     }
   )
-
-  const isInitialized = useState<boolean>('admin-resumes-initialized', () => false)
-  const newResumes = useState<AdminResumeItem[]>('admin-new-resumes', () => [])
-  const acceptedResumes = useState<AdminResumeItem[]>('admin-accepted-resumes', () => [])
-  const rejectedResumes = useState<AdminResumeItem[]>('admin-rejected-resumes', () => [])
 
   watch(
     () => data.value,
@@ -80,6 +91,29 @@ export async function useAdminResumes() {
     return true
   }
 
+  function updateResumeScore(userId: string, score: number | null) {
+    const allBuckets = [newResumes.value, acceptedResumes.value, rejectedResumes.value]
+
+    for (const bucket of allBuckets) {
+      const resume = bucket.find((item) => item.userId === userId)
+
+      if (resume) {
+        resume.score = score
+        break
+      }
+    }
+  }
+
+  async function rescoreResume(userId: string) {
+    const result = await $fetch<RescoreResumeResponse>(`/api/admin/resumes/${userId}/rescore`, {
+      method: 'POST',
+    })
+
+    updateResumeScore(userId, result.score)
+
+    return result
+  }
+
   async function refreshResumes() {
     await refresh()
 
@@ -103,5 +137,6 @@ export async function useAdminResumes() {
     acceptedResumes,
     rejectedResumes,
     moveResume,
+    rescoreResume,
   }
 }

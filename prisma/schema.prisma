@@ -103,6 +103,13 @@ model ApplicantJobListing {
   applicantInfoId Int
   jobListingId    Int
   appliedAt       DateTime      @default(now())
+  aiScore         Int?
+  aiSummary       String?
+  aiMatchedSkills String?
+  aiMissingSkills String?
+  aiConcerns      String?
+  aiScoredAt      DateTime?
+  aiModel         String?
   applicantInfo   ApplicantInfo @relation(fields: [applicantInfoId], references: [id], onDelete: Cascade)
   jobListing      JobListing    @relation(fields: [jobListingId], references: [id], onDelete: Cascade)
 

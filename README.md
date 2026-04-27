@@ -56,6 +56,12 @@ Open `.env` and configure the following:
 - `BETTER_AUTH_URL`: The base URL of your application (default: `http://localhost:3000`).
 - `EMAIL_USER`: Your Gmail address (for OTP delivery).
 - `EMAIL_PASS`: Your Gmail App Password. [How to generate an App Password](https://support.google.com/accounts/answer/185833).
+- `AI_PROVIDER`: The AI backend to use for resume scoring. Supported values are `ollama` and `openai`. Default: `ollama`.
+- `OLLAMA_BASE_URL`: Local Ollama server URL (default: `http://127.0.0.1:11434`).
+- `OLLAMA_MODEL`: Ollama model name for scoring (default: `llama3.2:3b`).
+- `OPENAI_API_KEY`: Your OpenAI-compatible API key for resume scoring.
+- `OPENAI_BASE_URL`: Optional override for an OpenAI-compatible endpoint (default: `https://api.openai.com/v1`).
+- `OPENAI_MODEL`: Optional model name for scoring (default: `gpt-4o-mini`).
 
 ### 4. Database Setup
 
@@ -73,6 +79,26 @@ pnpm dev
 ```
 
 Your application will be available at `http://localhost:3000`. This command also starts **Prisma Studio** automatically.
+
+### AI Resume Scoring
+
+When an applicant submits for a job, the server now:
+
+- extracts plain text from the uploaded PDF resume,
+- compares it to the selected job listing with either a local Ollama model or an OpenAI-compatible model,
+- stores a `1-10` match score plus a short explanation and skill gaps on the application record.
+
+The default setup uses Ollama locally, so there is no API key requirement if you have Ollama running on your machine.
+
+To use Ollama locally:
+
+1. Install Ollama from `https://ollama.com/download`
+2. Pull a model such as `ollama pull llama3.2:3b`
+3. Keep Ollama running locally
+4. Set `AI_PROVIDER=ollama` in `.env`
+5. Restart the Nuxt dev server
+
+To switch back to an OpenAI-compatible API instead, set `AI_PROVIDER=openai` and provide the `OPENAI_*` variables.
 
 ### 6. How to Login
 

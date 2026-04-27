@@ -9,6 +9,22 @@
   const application = computed(() => getApplication(applicationId.value))
   const job = computed(() => getJob(application.value?.jobId || 0))
 
+  function getScoreColor(score: number | null) {
+    if (score === null) {
+      return 'neutral'
+    }
+
+    if (score >= 8) {
+      return 'success'
+    }
+
+    if (score >= 6) {
+      return 'warning'
+    }
+
+    return 'error'
+  }
+
   async function withdraw() {
     if (!application.value) {
       return
@@ -50,6 +66,78 @@
                 label="View Job"
               />
               <UButton color="error" variant="soft" label="Withdraw" @click="withdraw" />
+            </div>
+          </div>
+        </div>
+      </UCard>
+
+      <UCard>
+        <template #header>
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h2 class="text-lg font-semibold text-[var(--ui-text)]">AI Match Score</h2>
+            <UBadge :color="getScoreColor(application.aiScore)" variant="soft" size="lg">
+              {{ application.aiScore === null ? 'Pending' : `${application.aiScore}/10` }}
+            </UBadge>
+          </div>
+        </template>
+
+        <div class="space-y-4 text-sm text-[var(--ui-text-muted)]">
+          <p v-if="application.aiSummary" class="leading-6 text-[var(--ui-text)]">
+            {{ application.aiSummary }}
+          </p>
+          <p v-else class="leading-6">
+            AI scoring is not available yet for this application. Add an API key and submit again to
+            generate a score.
+          </p>
+
+          <p v-if="application.aiScoredAt">
+            Scored on {{ new Date(application.aiScoredAt).toLocaleString() }}
+            <span v-if="application.aiModel">using {{ application.aiModel }}</span>
+          </p>
+
+          <div class="grid gap-4 lg:grid-cols-3">
+            <div
+              class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] p-4"
+            >
+              <p class="font-medium text-[var(--ui-text)]">Matched Skills</p>
+              <div v-if="application.aiMatchedSkills.length" class="mt-3 flex flex-wrap gap-2">
+                <UBadge
+                  v-for="skill in application.aiMatchedSkills"
+                  :key="skill"
+                  color="success"
+                  variant="soft"
+                >
+                  {{ skill }}
+                </UBadge>
+              </div>
+              <p v-else class="mt-3 leading-6">No matched skills were returned.</p>
+            </div>
+
+            <div
+              class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] p-4"
+            >
+              <p class="font-medium text-[var(--ui-text)]">Missing Skills</p>
+              <div v-if="application.aiMissingSkills.length" class="mt-3 flex flex-wrap gap-2">
+                <UBadge
+                  v-for="skill in application.aiMissingSkills"
+                  :key="skill"
+                  color="warning"
+                  variant="soft"
+                >
+                  {{ skill }}
+                </UBadge>
+              </div>
+              <p v-else class="mt-3 leading-6">No missing skills were flagged.</p>
+            </div>
+
+            <div
+              class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] p-4"
+            >
+              <p class="font-medium text-[var(--ui-text)]">Concerns</p>
+              <ul v-if="application.aiConcerns.length" class="mt-3 space-y-2 leading-6">
+                <li v-for="concern in application.aiConcerns" :key="concern">{{ concern }}</li>
+              </ul>
+              <p v-else class="mt-3 leading-6">No major concerns were returned.</p>
             </div>
           </div>
         </div>

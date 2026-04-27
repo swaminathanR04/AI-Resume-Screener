@@ -1,5 +1,7 @@
 import { prisma } from '~~/server/utils/prisma'
 import { auth } from '~~/server/utils/auth'
+import { parseAiList } from '~~/server/utils/ai-score'
+import { scoreStoredApplication } from '~~/server/utils/application-ai-score'
 
 type SubmitApplicationBody = {
   jobListingId?: number
@@ -58,6 +60,13 @@ export default defineEventHandler(async (event) => {
     },
     update: {
       appliedAt: new Date(),
+      aiScore: null,
+      aiSummary: null,
+      aiMatchedSkills: null,
+      aiMissingSkills: null,
+      aiConcerns: null,
+      aiScoredAt: null,
+      aiModel: null,
     },
     create: {
       applicantInfoId: applicantInfo.id,
@@ -65,14 +74,37 @@ export default defineEventHandler(async (event) => {
     },
   })
 
+  let scoredApplication = application
+
+  try {
+    const scoreResult = await scoreStoredApplication({
+      applicantInfoId: applicantInfo.id,
+      jobListingId,
+      resumePath: applicantInfo.resumePath,
+    })
+
+    if (scoreResult) {
+      scoredApplication = scoreResult.scoredApplication
+    }
+  } catch (error) {
+    console.error('Application AI scoring failed:', error)
+  }
+
   return {
-    id: application.jobListingId,
-    jobId: application.jobListingId,
+    id: scoredApplication.jobListingId,
+    jobId: scoredApplication.jobListingId,
     title: jobListing.jobTitle,
     location: jobListing.location,
     employmentType: jobListing.employmentType,
-    appliedAt: application.appliedAt,
-    applied: application.appliedAt,
+    appliedAt: scoredApplication.appliedAt,
+    applied: scoredApplication.appliedAt,
     resumePath: applicantInfo.resumePath,
+    aiScore: scoredApplication.aiScore,
+    aiSummary: scoredApplication.aiSummary,
+    aiMatchedSkills: parseAiList(scoredApplication.aiMatchedSkills),
+    aiMissingSkills: parseAiList(scoredApplication.aiMissingSkills),
+    aiConcerns: parseAiList(scoredApplication.aiConcerns),
+    aiScoredAt: scoredApplication.aiScoredAt,
+    aiModel: scoredApplication.aiModel,
   }
 })

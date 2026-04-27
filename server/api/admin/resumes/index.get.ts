@@ -54,6 +54,6 @@ export default defineEventHandler(async (event) => {
     appliedRole: applicant.applications[0]?.jobListing.jobTitle || 'No job application yet',
     submittedAt: applicant.applications[0]?.appliedAt || applicant.updatedAt,
     applicationCount: applicant.applications.length,
-    score: 10,
+    score: applicant.applications[0]?.aiScore ?? null,
   }))
 })

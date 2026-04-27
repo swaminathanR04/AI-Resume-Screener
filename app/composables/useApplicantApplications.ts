@@ -7,6 +7,13 @@ export type ApplicantApplication = {
   appliedAt: string
   applied: string
   resumePath: string | null
+  aiScore: number | null
+  aiSummary: string | null
+  aiMatchedSkills: string[]
+  aiMissingSkills: string[]
+  aiConcerns: string[]
+  aiScoredAt: string | null
+  aiModel: string | null
 }
 
 export async function useApplicantApplications() {
