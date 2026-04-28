@@ -1,4 +1,5 @@
 import { auth } from '~~/server/utils/auth'
+import { createAuditLogEntry, getAuditActorName } from '~~/server/utils/audit-log'
 import { prisma } from '~~/server/utils/prisma'
 import { isAdminUser } from '~~/server/utils/user-role'
 
@@ -82,6 +83,17 @@ export default defineEventHandler(async (event) => {
     data: {
       reviewStatus,
     },
+  })
+
+  const statusLabel =
+    reviewStatus === 'advanced' ? 'Advanced' : reviewStatus === 'rejected' ? 'Rejected' : 'Archived'
+
+  await createAuditLogEntry({
+    actorType: 'Admin',
+    actorName: getAuditActorName(session.user),
+    action: 'Status Changed',
+    itemType: 'Candidate',
+    details: `${applicant.name || applicant.user.name || applicant.user.email} moved to ${statusLabel} for ${latestApplication.jobListing.jobTitle}.`,
   })
 
   return {

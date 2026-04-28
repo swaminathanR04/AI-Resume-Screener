@@ -1,4 +1,5 @@
 import { prisma } from '~~/server/utils/prisma'
+import { createAuditLogEntry } from '~~/server/utils/audit-log'
 import { scoreResumeAgainstJob, serializeAiList } from '~~/server/utils/ai-score'
 import { getAiScoringConfig } from '~~/server/utils/ai-config'
 import { extractResumeText } from '~~/server/utils/resume-text'
@@ -56,6 +57,14 @@ export async function scoreStoredApplication(input: ScoreStoredApplicationInput)
       aiScoredAt: new Date(),
       aiModel: scoreResult.model,
     },
+  })
+
+  await createAuditLogEntry({
+    actorType: 'System',
+    actorName: 'System',
+    action: 'Resume Scored',
+    itemType: 'Candidate',
+    details: `${jobListing.jobTitle} scored at ${scoreResult.score}/10 and routed to ${scoredApplication.reviewStatus}.`,
   })
 
   return {

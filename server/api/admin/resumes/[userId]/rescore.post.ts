@@ -1,5 +1,6 @@
 import { prisma } from '~~/server/utils/prisma'
 import { auth } from '~~/server/utils/auth'
+import { createAuditLogEntry, getAuditActorName } from '~~/server/utils/audit-log'
 import { isAdminUser } from '~~/server/utils/user-role'
 import { parseAiList } from '~~/server/utils/ai-score'
 import { scoreStoredApplication } from '~~/server/utils/application-ai-score'
@@ -79,6 +80,14 @@ export default defineEventHandler(async (event) => {
   })
 
   if (!scoreResult) {
+    await createAuditLogEntry({
+      actorType: 'Admin',
+      actorName: getAuditActorName(session.user),
+      action: 'Resume Re-scored',
+      itemType: 'Candidate',
+      details: `${applicant.name || applicant.user.email} was re-scored for ${latestApplication.jobListing.jobTitle}, but no AI score was available.`,
+    })
+
     return {
       reviewStatus: latestApplication.reviewStatus,
       userId,
@@ -93,6 +102,14 @@ export default defineEventHandler(async (event) => {
       aiModel: null,
     }
   }
+
+  await createAuditLogEntry({
+    actorType: 'Admin',
+    actorName: getAuditActorName(session.user),
+    action: 'Resume Re-scored',
+    itemType: 'Candidate',
+    details: `${applicant.name || applicant.user.email} re-scored to ${scoreResult.scoredApplication.aiScore}/10 for ${latestApplication.jobListing.jobTitle}.`,
+  })
 
   return {
     reviewStatus: scoreResult.scoredApplication.reviewStatus,

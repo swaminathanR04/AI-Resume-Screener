@@ -7,6 +7,7 @@
     | 'audit-log'
     | 'ai-config'
     | 'dashboard'
+    | 'profile'
     | 'technical'
 
   type NavItem = {
@@ -38,6 +39,11 @@
   )
 
   const sections = computed<NavSection[]>(() => [
+    {
+      key: 'profile',
+      label: 'Profile',
+      to: '/admin-profile',
+    },
     {
       key: 'dashboard',
       label: 'Dashboard',
@@ -73,7 +79,7 @@
     },
     {
       key: 'technical',
-      label: 'Technical',
+      label: 'Technical (Mock)',
       items: [
         { label: 'Overview', to: '/technical' },
         { label: 'Validation Center', to: '/technical/validation-center' },

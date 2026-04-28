@@ -1,5 +1,6 @@
 import { prisma } from '~~/server/utils/prisma'
 import { auth } from '~~/server/utils/auth'
+import { createAuditLogEntry, getAuditActorName } from '~~/server/utils/audit-log'
 import { isAdminUser } from '~~/server/utils/user-role'
 
 type CreateJobListingBody = {
@@ -47,6 +48,14 @@ export default defineEventHandler(async (event) => {
       jobDescription,
       requiredSkills: JSON.stringify(requiredSkills),
     },
+  })
+
+  await createAuditLogEntry({
+    actorType: 'Admin',
+    actorName: getAuditActorName(session.user),
+    action: 'Job Created',
+    itemType: 'Job Listing',
+    details: `${jobListing.jobTitle} role added in ${jobListing.location}.`,
   })
 
   setResponseStatus(event, 201)

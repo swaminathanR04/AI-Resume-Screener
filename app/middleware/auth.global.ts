@@ -4,6 +4,7 @@ import { getUserHomePath, isAdminUser } from '../utils/user-role'
 export default defineNuxtRouteMiddleware(async (to) => {
   const adminRoutePrefixes = [
     '/dashboard',
+    '/admin-profile',
     '/allresumes',
     '/accepted',
     '/rejected',

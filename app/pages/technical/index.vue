@@ -55,10 +55,6 @@
             <h2 class="text-2xl font-semibold text-[var(--ui-text)] sm:text-3xl">
               Monitor validation, system health, and AI processing flow.
             </h2>
-            <p class="max-w-2xl text-sm leading-6 text-[var(--ui-text-muted)] sm:text-base">
-              This brings over the Technical-UI branch sections as operational pages while keeping
-              the current product shell, navigation, and design language intact.
-            </p>
           </div>
 
           <div class="grid gap-3 sm:grid-cols-2">

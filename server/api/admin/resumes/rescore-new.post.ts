@@ -1,4 +1,5 @@
 import { auth } from '~~/server/utils/auth'
+import { createAuditLogEntry, getAuditActorName } from '~~/server/utils/audit-log'
 import { prisma } from '~~/server/utils/prisma'
 import { scoreStoredApplication } from '~~/server/utils/application-ai-score'
 import { isAdminUser } from '~~/server/utils/user-role'
@@ -57,6 +58,14 @@ export default defineEventHandler(async (event) => {
       rescoredCount += 1
     }
   }
+
+  await createAuditLogEntry({
+    actorType: 'Admin',
+    actorName: getAuditActorName(session.user),
+    action: 'Bulk Re-score',
+    itemType: 'Candidate Queue',
+    details: `Processed ${applications.length} new resumes. ${rescoredCount} remained in New, ${rejectedCount} moved to Rejected, ${pendingCount} stayed pending.`,
+  })
 
   return {
     total: applications.length,

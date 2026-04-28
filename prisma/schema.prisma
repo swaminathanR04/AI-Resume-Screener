@@ -132,3 +132,16 @@ model AiScoringConfig {
 
   @@map("AI_Scoring_Config")
 }
+
+model AuditLogEntry {
+  id        Int      @id @default(autoincrement())
+  actorType String
+  actorName String
+  action    String
+  itemType  String
+  details   String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("Audit_Log_Entries")
+}

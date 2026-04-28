@@ -1,5 +1,6 @@
 import { auth } from '~~/server/utils/auth'
 import { aiScoringConfigSchema, updateAiScoringConfig } from '~~/server/utils/ai-config'
+import { createAuditLogEntry, getAuditActorName } from '~~/server/utils/audit-log'
 import { isAdminUser } from '~~/server/utils/user-role'
 
 export default defineEventHandler(async (event) => {
@@ -17,8 +18,17 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event)
   const config = aiScoringConfigSchema.parse(body)
+  const updatedConfig = await updateAiScoringConfig(config)
+
+  await createAuditLogEntry({
+    actorType: 'Admin',
+    actorName: getAuditActorName(session.user),
+    action: 'AI Config Updated',
+    itemType: 'AI Configuration',
+    details: `Weights saved as ${updatedConfig.skillsWeight}/${updatedConfig.experienceWeight}/${updatedConfig.educationWeight}/${updatedConfig.portfolioWeight} with minimum score ${updatedConfig.minimumScore}/10.`,
+  })
 
   return {
-    config: await updateAiScoringConfig(config),
+    config: updatedConfig,
   }
 })
