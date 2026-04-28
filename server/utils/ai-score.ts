@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { AiScoringConfigSnapshot } from '~~/server/utils/ai-config'
 
 const aiScoreSchema = z.object({
   score: z.number().int().min(1).max(10),
@@ -21,6 +22,7 @@ type ScoreResumeInput = {
     description: string
     requiredSkills: string[]
   }
+  config: AiScoringConfigSnapshot
 }
 
 const systemPrompt = `You are an applicant screening assistant.
@@ -32,6 +34,8 @@ Rules:
 - Use evidence from the resume only.
 - Do not invent experience, skills, or education.
 - Penalize missing required skills and vague or unsupported experience.
+- Follow the scoring weights and custom rules provided in the user prompt.
+- Apply custom rules only when there is explicit evidence in the resume.
 - Keep the summary to 1 or 2 sentences.
 - matchedSkills and missingSkills should be concise phrases.
 - concerns should list concrete gaps or uncertainties.
@@ -46,6 +50,13 @@ type AiProvider = 'openai' | 'ollama'
 
 function getScoringPrompt(input: ScoreResumeInput) {
   return [
+    'Scoring Configuration:',
+    `Skills Weight: ${input.config.skillsWeight}%`,
+    `Experience Weight: ${input.config.experienceWeight}%`,
+    `Education Weight: ${input.config.educationWeight}%`,
+    `Portfolio Weight: ${input.config.portfolioWeight}%`,
+    `Minimum Score Threshold: ${input.config.minimumScore}/10`,
+    `Custom Rules: ${input.config.customRules.join(' | ') || 'None'}`,
     `Job Title: ${input.job.title}`,
     `Location: ${input.job.location}`,
     `Employment Type: ${input.job.employmentType}`,

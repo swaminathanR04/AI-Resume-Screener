@@ -1,5 +1,25 @@
 <script setup lang="ts">
-  const { rejectedResumes } = await useAdminResumes()
+  const toast = useToast()
+  const { rejectedResumes, getResumeScoreTextClass, moveResume } = await useAdminResumes()
+
+  async function archiveResume(userId: string, applicantName: string) {
+    try {
+      await moveResume(userId, 'archived')
+
+      toast.add({
+        title: 'Resume archived',
+        description: `${applicantName} was moved to Archived.`,
+        color: 'neutral',
+      })
+    } catch (error) {
+      toast.add({
+        title: 'Archive failed',
+        description:
+          error instanceof Error ? error.message : 'Unable to archive this resume right now.',
+        color: 'error',
+      })
+    }
+  }
 </script>
 
 <template>
@@ -18,6 +38,19 @@
             <p class="text-sm text-[var(--ui-text-muted)]">
               Submitted {{ new Date(resume.submittedAt).toLocaleString() }}
             </p>
+            <div
+              v-if="resume.aiSummary"
+              class="max-w-2xl rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-4 py-3"
+            >
+              <p
+                class="text-xs font-medium tracking-[0.12em] text-[var(--ui-text-muted)] uppercase"
+              >
+                AI Reason
+              </p>
+              <p class="mt-2 text-sm leading-6 text-[var(--ui-text)]">
+                {{ resume.aiSummary }}
+              </p>
+            </div>
           </div>
 
           <div class="flex flex-col items-start gap-3 sm:items-end">
@@ -28,8 +61,10 @@
                 class="text-xs font-medium tracking-[0.12em] text-[var(--ui-text-muted)] uppercase"
                 >Ranking</span
               >
-              <span class="text-base font-semibold text-[var(--ui-primary)]"
-                >{{ resume.score.toFixed(1) }}/10</span
+              <span
+                class="text-base font-semibold"
+                :class="getResumeScoreTextClass(resume.score)"
+                >{{ resume.score === null ? 'Pending' : `${resume.score.toFixed(1)}/10` }}</span
               >
             </div>
             <UButton
@@ -38,6 +73,12 @@
               color="primary"
               variant="soft"
               label="Open Resume"
+            />
+            <UButton
+              color="neutral"
+              variant="soft"
+              label="Archive"
+              @click="archiveResume(resume.userId, resume.applicantName)"
             />
           </div>
         </div>

@@ -1,31 +1,52 @@
 <script setup lang="ts">
   const toast = useToast()
   const isRescoring = ref<string | null>(null)
-  const { newResumes, pending, error, refreshResumes, moveResume, rescoreResume } =
-    await useAdminResumes()
+  const {
+    newResumes,
+    pending,
+    error,
+    refreshResumes,
+    moveResume,
+    rescoreResume,
+    getResumeScoreTextClass,
+  } = await useAdminResumes()
 
-  function advanceResume(userId: string, applicantName: string) {
-    if (!moveResume(userId, 'accepted')) {
-      return
+  async function advanceResume(userId: string, applicantName: string) {
+    try {
+      await moveResume(userId, 'advanced')
+
+      toast.add({
+        title: 'Resume advanced',
+        description: `${applicantName} was moved to Advanced.`,
+        color: 'success',
+      })
+    } catch (error) {
+      toast.add({
+        title: 'Move failed',
+        description:
+          error instanceof Error ? error.message : 'Unable to move this resume right now.',
+        color: 'error',
+      })
     }
-
-    toast.add({
-      title: 'Resume advanced',
-      description: `${applicantName} was moved to Accepted.`,
-      color: 'success',
-    })
   }
 
-  function rejectResume(userId: string, applicantName: string) {
-    if (!moveResume(userId, 'rejected')) {
-      return
-    }
+  async function rejectResume(userId: string, applicantName: string) {
+    try {
+      await moveResume(userId, 'rejected')
 
-    toast.add({
-      title: 'Resume rejected',
-      description: `${applicantName} was moved to Rejected.`,
-      color: 'warning',
-    })
+      toast.add({
+        title: 'Resume rejected',
+        description: `${applicantName} was moved to Rejected.`,
+        color: 'warning',
+      })
+    } catch (error) {
+      toast.add({
+        title: 'Move failed',
+        description:
+          error instanceof Error ? error.message : 'Unable to move this resume right now.',
+        color: 'error',
+      })
+    }
   }
 
   async function handleRescore(userId: string, applicantName: string) {
@@ -103,6 +124,19 @@
               <p class="text-sm text-[var(--ui-text-muted)]">
                 Applications: {{ resume.applicationCount }}
               </p>
+              <div
+                v-if="resume.aiSummary"
+                class="max-w-2xl rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-4 py-3"
+              >
+                <p
+                  class="text-xs font-medium tracking-[0.12em] text-[var(--ui-text-muted)] uppercase"
+                >
+                  AI Reason
+                </p>
+                <p class="mt-2 text-sm leading-6 text-[var(--ui-text)]">
+                  {{ resume.aiSummary }}
+                </p>
+              </div>
             </div>
 
             <div class="flex flex-col items-start gap-3 sm:items-end">
@@ -114,7 +148,10 @@
                 >
                   Ranking
                 </span>
-                <span class="text-base font-semibold text-[var(--ui-primary)]">
+                <span
+                  class="text-base font-semibold"
+                  :class="getResumeScoreTextClass(resume.score)"
+                >
                   {{ resume.score === null ? 'Pending' : `${resume.score.toFixed(1)}/10` }}
                 </span>
               </div>

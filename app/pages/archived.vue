@@ -1,22 +1,65 @@
 <script setup lang="ts">
-  const { archivedResumes } = useResumeStore()
-
-  function updateRanking({ resumeId, ranking }: { resumeId: number; ranking: number }) {
-    const item = archivedResumes.value.find((resume) => resume.id === resumeId)
-
-    if (item) {
-      item.ranking = ranking
-    }
-  }
+  const { archivedResumes, getResumeScoreTextClass } = await useAdminResumes()
 </script>
 
 <template>
   <ResumeScreenerShell title="Archived Resumes" active-section="resumes" active-sub-item="Archived">
-    <ResumeListPanel
-      :items="archivedResumes"
-      comment-key="archiveComment"
-      empty-message="No archived resumes yet."
-      @update-ranking="updateRanking"
-    />
+    <section class="space-y-4">
+      <UCard v-for="resume in archivedResumes" :key="resume.userId">
+        <div class="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-6">
+          <div class="space-y-2">
+            <div class="flex flex-wrap items-center gap-3">
+              <h3 class="text-lg font-semibold text-[var(--ui-text)]">
+                {{ resume.applicantName }}
+              </h3>
+              <UBadge color="primary" variant="soft">{{ resume.appliedRole }}</UBadge>
+            </div>
+            <p class="text-sm text-[var(--ui-text-muted)]">{{ resume.email }}</p>
+            <p class="text-sm text-[var(--ui-text-muted)]">
+              Submitted {{ new Date(resume.submittedAt).toLocaleString() }}
+            </p>
+            <div
+              v-if="resume.aiSummary"
+              class="max-w-2xl rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-4 py-3"
+            >
+              <p
+                class="text-xs font-medium tracking-[0.12em] text-[var(--ui-text-muted)] uppercase"
+              >
+                AI Reason
+              </p>
+              <p class="mt-2 text-sm leading-6 text-[var(--ui-text)]">
+                {{ resume.aiSummary }}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex flex-col items-start gap-3 sm:items-end">
+            <div
+              class="flex items-center gap-3 self-start rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-4 py-2"
+            >
+              <span
+                class="text-xs font-medium tracking-[0.12em] text-[var(--ui-text-muted)] uppercase"
+              >
+                Ranking
+              </span>
+              <span class="text-base font-semibold" :class="getResumeScoreTextClass(resume.score)">
+                {{ resume.score === null ? 'Pending' : `${resume.score.toFixed(1)}/10` }}
+              </span>
+            </div>
+            <UButton
+              :to="`/api/admin/resumes/${resume.userId}`"
+              target="_blank"
+              color="primary"
+              variant="soft"
+              label="Open Resume"
+            />
+          </div>
+        </div>
+      </UCard>
+
+      <UCard v-if="archivedResumes.length === 0">
+        <div class="p-8 text-center text-[var(--ui-text-muted)]">No archived resumes yet.</div>
+      </UCard>
+    </section>
   </ResumeScreenerShell>
 </template>

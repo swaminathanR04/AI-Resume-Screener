@@ -103,6 +103,7 @@ model ApplicantJobListing {
   applicantInfoId Int
   jobListingId    Int
   appliedAt       DateTime      @default(now())
+  reviewStatus    String        @default("new")
   aiScore         Int?
   aiSummary       String?
   aiMatchedSkills String?
@@ -116,4 +117,18 @@ model ApplicantJobListing {
   @@id([applicantInfoId, jobListingId])
   @@index([jobListingId])
   @@map("Applicant_Job_Listings")
+}
+
+model AiScoringConfig {
+  id               Int      @id
+  skillsWeight     Int      @default(40)
+  experienceWeight Int      @default(30)
+  educationWeight  Int      @default(20)
+  portfolioWeight  Int      @default(10)
+  customRules      String   @default("[\"Add a point if applicant is a US Veteran\"]")
+  minimumScore     Int      @default(6)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("AI_Scoring_Config")
 }

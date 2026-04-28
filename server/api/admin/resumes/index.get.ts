@@ -48,6 +48,7 @@ export default defineEventHandler(async (event) => {
   })
 
   return applicants.map((applicant) => ({
+    reviewStatus: applicant.applications[0]?.reviewStatus || 'new',
     userId: applicant.user.id,
     applicantName: applicant.name || applicant.user.name,
     email: applicant.user.email,
@@ -55,5 +56,6 @@ export default defineEventHandler(async (event) => {
     submittedAt: applicant.applications[0]?.appliedAt || applicant.updatedAt,
     applicationCount: applicant.applications.length,
     score: applicant.applications[0]?.aiScore ?? null,
+    aiSummary: applicant.applications[0]?.aiSummary ?? null,
   }))
 })

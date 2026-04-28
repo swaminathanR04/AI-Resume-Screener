@@ -1,6 +1,5 @@
 import { prisma } from '~~/server/utils/prisma'
 import { auth } from '~~/server/utils/auth'
-import { parseAiList } from '~~/server/utils/ai-score'
 
 export default defineEventHandler(async (event) => {
   const session = await auth.api.getSession({
@@ -40,12 +39,5 @@ export default defineEventHandler(async (event) => {
     appliedAt: application.appliedAt,
     applied: application.appliedAt,
     resumePath: applicantInfo.resumePath,
-    aiScore: application.aiScore,
-    aiSummary: application.aiSummary,
-    aiMatchedSkills: parseAiList(application.aiMatchedSkills),
-    aiMissingSkills: parseAiList(application.aiMissingSkills),
-    aiConcerns: parseAiList(application.aiConcerns),
-    aiScoredAt: application.aiScoredAt,
-    aiModel: application.aiModel,
   }))
 })

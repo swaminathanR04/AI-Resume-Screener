@@ -65,6 +65,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  if (latestApplication.reviewStatus !== 'new') {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Only resumes in the New Resumes tab can be re-scored.',
+    })
+  }
+
   const scoreResult = await scoreStoredApplication({
     applicantInfoId: applicant.id,
     jobListingId: latestApplication.jobListingId,
@@ -73,6 +80,7 @@ export default defineEventHandler(async (event) => {
 
   if (!scoreResult) {
     return {
+      reviewStatus: latestApplication.reviewStatus,
       userId,
       applicantName: applicant.name || applicant.user.email,
       appliedRole: latestApplication.jobListing.jobTitle,
@@ -87,6 +95,7 @@ export default defineEventHandler(async (event) => {
   }
 
   return {
+    reviewStatus: scoreResult.scoredApplication.reviewStatus,
     userId,
     applicantName: applicant.name || applicant.user.email,
     appliedRole: latestApplication.jobListing.jobTitle,

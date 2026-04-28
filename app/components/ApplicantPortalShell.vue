@@ -9,10 +9,22 @@
   const colorMode = useColorMode()
 
   const { data: session } = await authClient.useSession(useFetch)
+  const { data: applicantInfo } = await useFetch<{
+    name: string | null
+  }>('/api/applicants/me', {
+    key: 'applicant-me-header',
+    pick: ['name'],
+  })
 
   const currentUser = computed(() => session.value?.user)
   const { displayName } = useProfileDisplayName(
-    computed(() => currentUser.value?.name || currentUser.value?.email || 'Applicant User')
+    computed(
+      () =>
+        applicantInfo.value?.name ||
+        currentUser.value?.name ||
+        currentUser.value?.email ||
+        'Applicant User'
+    )
   )
 
   const navItems = [

@@ -1,6 +1,5 @@
 import { prisma } from '~~/server/utils/prisma'
 import { auth } from '~~/server/utils/auth'
-import { parseAiList } from '~~/server/utils/ai-score'
 import { scoreStoredApplication } from '~~/server/utils/application-ai-score'
 
 type SubmitApplicationBody = {
@@ -60,6 +59,7 @@ export default defineEventHandler(async (event) => {
     },
     update: {
       appliedAt: new Date(),
+      reviewStatus: 'new',
       aiScore: null,
       aiSummary: null,
       aiMatchedSkills: null,
@@ -71,6 +71,7 @@ export default defineEventHandler(async (event) => {
     create: {
       applicantInfoId: applicantInfo.id,
       jobListingId,
+      reviewStatus: 'new',
     },
   })
 
@@ -99,12 +100,5 @@ export default defineEventHandler(async (event) => {
     appliedAt: scoredApplication.appliedAt,
     applied: scoredApplication.appliedAt,
     resumePath: applicantInfo.resumePath,
-    aiScore: scoredApplication.aiScore,
-    aiSummary: scoredApplication.aiSummary,
-    aiMatchedSkills: parseAiList(scoredApplication.aiMatchedSkills),
-    aiMissingSkills: parseAiList(scoredApplication.aiMissingSkills),
-    aiConcerns: parseAiList(scoredApplication.aiConcerns),
-    aiScoredAt: scoredApplication.aiScoredAt,
-    aiModel: scoredApplication.aiModel,
   }
 })

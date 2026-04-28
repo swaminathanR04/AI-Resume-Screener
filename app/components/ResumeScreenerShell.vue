@@ -48,7 +48,7 @@
       label: 'Resumes',
       items: [
         { label: 'New Resumes', to: '/allresumes' },
-        { label: 'Accepted', to: '/accepted' },
+        { label: 'Advanced', to: '/accepted' },
         { label: 'Rejected', to: '/rejected' },
         { label: 'Archived', to: '/archived' },
       ],

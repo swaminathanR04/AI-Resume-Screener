@@ -1,5 +1,6 @@
 import { prisma } from '~~/server/utils/prisma'
 import { scoreResumeAgainstJob, serializeAiList } from '~~/server/utils/ai-score'
+import { getAiScoringConfig } from '~~/server/utils/ai-config'
 import { extractResumeText } from '~~/server/utils/resume-text'
 
 type ScoreStoredApplicationInput = {
@@ -21,6 +22,7 @@ export async function scoreStoredApplication(input: ScoreStoredApplicationInput)
 
   const resumeText = await extractResumeText(input.resumePath)
   const requiredSkills = JSON.parse(jobListing.requiredSkills) as string[]
+  const aiConfig = await getAiScoringConfig()
   const scoreResult = await scoreResumeAgainstJob({
     resumeText,
     job: {
@@ -30,6 +32,7 @@ export async function scoreStoredApplication(input: ScoreStoredApplicationInput)
       description: jobListing.jobDescription,
       requiredSkills,
     },
+    config: aiConfig,
   })
 
   if (!scoreResult) {
@@ -44,6 +47,7 @@ export async function scoreStoredApplication(input: ScoreStoredApplicationInput)
       },
     },
     data: {
+      reviewStatus: scoreResult.score < aiConfig.minimumScore ? 'rejected' : 'new',
       aiScore: scoreResult.score,
       aiSummary: scoreResult.summary,
       aiMatchedSkills: serializeAiList(scoreResult.matchedSkills),
