@@ -1,46 +1,68 @@
 <script setup lang="ts">
   import { z } from 'zod'
-  import type { FormSubmitEvent } from '@nuxt/ui'
   import { authClient } from '../utils/auth-client'
 
   const toast = useToast()
   const isEmailSent = ref(false)
-
-  const schema = computed(() => {
-    if (!isEmailSent.value) {
-      return z.object({
-        email: z.string().email('Invalid email'),
-      })
-    } else {
-      return z.object({
-        email: z.string().email('Invalid email'),
-        otp: z.array(z.string()).length(6, 'Must be 6 digits'),
-      })
-    }
-  })
 
   const state = reactive({
     email: '',
     otp: [] as string[],
   })
 
-  async function handleSubmit(event: FormSubmitEvent<any>) {
+  const emailError = ref('')
+  const otpError = ref('')
+
+  const emailSchema = z.string().trim().email('Enter a valid work email address.')
+  const otpSchema = z.array(z.string()).length(6, 'Enter the full 6-digit code.')
+
+  watch(
+    () => state.email,
+    () => {
+      emailError.value = ''
+    }
+  )
+
+  watch(
+    () => state.otp,
+    () => {
+      otpError.value = ''
+    },
+    { deep: true }
+  )
+
+  async function handleSubmit() {
     if (!isEmailSent.value) {
+      const parsedEmail = emailSchema.safeParse(state.email)
+
+      if (!parsedEmail.success) {
+        emailError.value = parsedEmail.error.issues[0]?.message || 'Enter a valid work email address.'
+        return
+      }
+
       const { data, error } = await authClient.emailOtp.sendVerificationOtp({
-        email: state.email,
+        email: parsedEmail.data,
         type: 'sign-in',
       })
 
       if (error) {
         toast.add({ title: 'Error', description: error.message, color: 'error' })
       } else {
+        state.email = parsedEmail.data
         isEmailSent.value = true
         toast.add({ title: 'Success', description: 'OTP sent to your email', color: 'success' })
       }
     } else {
+      const parsedOtp = otpSchema.safeParse(state.otp)
+
+      if (!parsedOtp.success) {
+        otpError.value = parsedOtp.error.issues[0]?.message || 'Enter the full 6-digit code.'
+        return
+      }
+
       const { data, error } = await authClient.signIn.emailOtp({
         email: state.email,
-        otp: state.otp.join(''),
+        otp: parsedOtp.data.join(''),
       })
 
       if (error) {
@@ -53,31 +75,114 @@
 </script>
 
 <template>
-  <div class="flex h-full w-full items-center justify-center py-12">
-    <UCard class="w-full max-w-md">
-      <template #header>
-        <div class="flex items-center justify-center text-xl font-bold">Login</div>
-      </template>
+  <div class="brand-auth-page flex min-h-screen w-full items-center justify-center px-4 py-12">
+    <div class="grid w-full max-w-6xl gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center">
+      <section class="brand-auth-copy rounded-[2rem] border border-white/60 bg-white/55 p-6 backdrop-blur md:p-8 lg:p-10 dark:border-white/10 dark:bg-white/5">
+        <div class="space-y-6">
+          <CompanyBrand :show-tagline="true" align="left" />
 
-      <UForm :schema="schema" :state="state" @submit="handleSubmit" class="space-y-5">
-        <UFormField name="email" v-if="!isEmailSent">
-          <UInput v-model="state.email" class="w-full" placeholder="Email" />
-        </UFormField>
+          <div class="max-w-2xl space-y-5 text-[var(--ui-text)]">
+            <p class="brand-auth-eyebrow">Hiring Workspace</p>
+            <h1 class="brand-auth-heading text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+            Modern hiring review for fast-moving teams.
+            </h1>
+            <p class="max-w-xl text-base leading-7 text-[var(--ui-text-muted)] sm:text-lg">
+            Centralize resume intake, applicant updates, and AI-assisted screening in one clean
+            workspace built for 40 Hours Inc.
+            </p>
+          </div>
 
-        <UFormField name="otp" v-if="isEmailSent">
-          <UPinInput
-            otp
-            v-model="state.otp"
-            :length="6"
+          <div class="flex flex-wrap gap-3 text-sm text-[var(--ui-text-muted)]">
+            <span class="brand-auth-pill">
+              Resume Review
+            </span>
+            <span class="brand-auth-pill">
+              Applicant Notifications
+            </span>
+            <span class="brand-auth-pill">
+              AI Scoring
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <UCard
+        class="brand-auth-card w-full justify-self-center"
+        :ui="{
+          root: 'overflow-hidden',
+          header: 'border-b border-white/10 px-7 py-6 sm:px-8 sm:py-7',
+          body: 'px-7 py-7 sm:px-8 sm:py-8',
+        }"
+      >
+        <template #header>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--brand-accent)]">
+                  40 Hours Inc.
+                </p>
+                <div class="mt-2 text-2xl font-bold text-[var(--ui-text)]">Secure Login</div>
+              </div>
+              <div class="brand-auth-lockup">
+                <UIcon name="i-heroicons-lock-closed-20-solid" class="h-5 w-5" />
+              </div>
+            </div>
+
+            <p class="text-sm leading-6 text-[var(--ui-text-muted)]">
+              Sign in with your work email to access the hiring workspace.
+            </p>
+
+            <div class="brand-auth-note">
+              <UIcon name="i-heroicons-shield-check-20-solid" class="h-4 w-4 shrink-0 text-[var(--brand-accent)]" />
+              <span>One-time passcode authentication keeps access simple and secure.</span>
+            </div>
+          </div>
+        </template>
+
+        <form class="space-y-5" @submit.prevent="handleSubmit">
+          <UFormField
+            v-if="!isEmailSent"
+            name="email"
+            label="Enter Email"
+            :error="emailError"
+          >
+            <UInput
+              v-model="state.email"
+              class="brand-auth-input w-full"
+              icon="i-heroicons-envelope-20-solid"
+              size="xl"
+              variant="outline"
+              placeholder="name@40hours.com"
+              autocomplete="email"
+            />
+          </UFormField>
+
+          <UFormField
+            v-if="isEmailSent"
+            name="otp"
+            label="Verification Code"
+            :error="otpError"
+            description="Enter the 6-digit code sent to your inbox."
+          >
+            <UPinInput
+              otp
+              v-model="state.otp"
+              :length="6"
+              size="xl"
+              class="brand-auth-pin flex w-full items-center justify-center"
+            />
+          </UFormField>
+
+          <UButton
+            loading-auto
+            type="submit"
+            class="brand-auth-button w-full justify-center"
             size="xl"
-            class="flex w-full items-center justify-center"
-          />
-        </UFormField>
-
-        <UButton loading-auto type="submit" class="w-full justify-center">
-          {{ isEmailSent ? 'Login' : 'Send OTP' }}
-        </UButton>
-      </UForm>
-    </UCard>
+          >
+            {{ isEmailSent ? 'Login' : 'Send OTP' }}
+          </UButton>
+        </form>
+      </UCard>
+    </div>
   </div>
 </template>

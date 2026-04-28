@@ -62,24 +62,30 @@
 </script>
 
 <template>
-  <div class="min-h-screen bg-[var(--ui-bg)] text-[var(--ui-text)]">
-    <div class="border-b border-[var(--ui-border)] bg-[var(--ui-bg-elevated)]">
+  <div class="brand-surface min-h-screen text-[var(--ui-text)]">
+    <div class="border-b border-[var(--ui-border)] bg-white/70 backdrop-blur dark:bg-slate-950/70">
       <div
         class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-8"
       >
-        <div class="flex items-center gap-3">
-          <UAvatar
-            :src="getProfileImageLink()"
-            :alt="displayName"
-            icon="i-heroicons-user-circle-20-solid"
-            color="primary"
-            variant="soft"
-            size="lg"
-            :as="{ img: 'img' }"
-          />
-          <div>
-            <p class="text-sm font-semibold text-[var(--ui-text)]">{{ displayName }}</p>
-            <p class="text-xs text-[var(--ui-text-muted)]">Applicant</p>
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
+          <CompanyBrand compact />
+
+          <div
+            class="flex items-center gap-3 rounded-2xl border border-white/50 bg-white/70 px-3 py-2 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5"
+          >
+            <UAvatar
+              :src="getProfileImageLink()"
+              :alt="displayName"
+              icon="i-heroicons-user-circle-20-solid"
+              color="primary"
+              variant="soft"
+              size="lg"
+              :as="{ img: 'img' }"
+            />
+            <div>
+              <p class="text-sm font-semibold text-[var(--ui-text)]">{{ displayName }}</p>
+              <p class="text-xs text-[var(--ui-text-muted)]">Applicant</p>
+            </div>
           </div>
         </div>
 
@@ -122,9 +128,14 @@
 
     <main class="mx-auto max-w-6xl px-4 py-6 lg:px-8 lg:py-8">
       <div
-        class="rounded-3xl border border-[var(--ui-border)] bg-[var(--ui-bg)] p-5 shadow-sm sm:p-6 lg:p-8"
+        class="brand-panel rounded-[2rem] border border-[var(--ui-border)] p-5 shadow-sm sm:p-6 lg:p-8"
       >
         <div class="mb-6 border-b border-[var(--ui-border)] pb-4">
+          <p
+            class="mb-2 text-xs font-semibold tracking-[0.3em] text-[var(--brand-accent)] uppercase"
+          >
+            40 Hours Inc.
+          </p>
           <h1 class="text-3xl font-semibold tracking-tight text-[var(--ui-text)] sm:text-4xl">
             {{ title }}
           </h1>

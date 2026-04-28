@@ -128,14 +128,20 @@
 </script>
 
 <template>
-  <div class="min-h-screen bg-[var(--ui-bg)] text-[var(--ui-text)]">
+  <div class="brand-surface min-h-screen text-[var(--ui-text)]">
     <div class="min-h-screen lg:flex">
       <aside
-        class="flex w-full shrink-0 flex-col border-b border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] lg:min-h-screen lg:w-72 lg:border-r lg:border-b-0"
+        class="brand-sidebar flex w-full shrink-0 flex-col border-b border-[var(--ui-border)] lg:min-h-screen lg:w-72 lg:border-r lg:border-b-0"
       >
         <div class="border-b border-[var(--ui-border)] p-4 sm:p-5">
+          <div class="mb-5 flex justify-center lg:justify-start">
+            <CompanyBrand compact />
+          </div>
+
           <div class="flex items-start justify-between gap-3">
-            <div class="flex min-w-0 items-start gap-3">
+            <div
+              class="flex min-w-0 items-start gap-3 rounded-2xl border border-white/50 bg-white/70 p-3 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5"
+            >
               <UAvatar
                 :src="getProfileImageLink()"
                 :alt="displayName"
@@ -261,18 +267,26 @@
         </nav>
 
         <div
-          class="border-t border-[var(--ui-border)] px-4 py-4 text-sm font-semibold text-[var(--ui-text-muted)]"
+          class="border-t border-[var(--ui-border)] px-4 py-4 text-sm"
           :class="isMobileSidebarOpen ? 'block' : 'hidden lg:block'"
         >
-          AI Resume Screener
+          <p class="font-semibold text-[var(--ui-text)]">40 Hours Inc.</p>
+          <p class="mt-1 text-xs text-[var(--ui-text-muted)]">
+            Hiring operations and AI review workspace.
+          </p>
         </div>
       </aside>
 
-      <main class="min-w-0 flex-1 bg-[var(--ui-bg-muted)]/40 px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
+      <main class="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
         <div
-          class="mx-auto max-w-6xl rounded-3xl border border-[var(--ui-border)] bg-[var(--ui-bg)] p-4 shadow-sm sm:p-6 lg:min-h-[calc(100vh-4rem)] lg:p-8"
+          class="brand-panel mx-auto max-w-6xl rounded-[2rem] border border-[var(--ui-border)] p-4 shadow-sm sm:p-6 lg:min-h-[calc(100vh-4rem)] lg:p-8"
         >
           <div class="mb-6 border-b border-[var(--ui-border)] pb-4">
+            <p
+              class="mb-2 text-xs font-semibold tracking-[0.3em] text-[var(--brand-accent)] uppercase"
+            >
+              40 Hours Inc.
+            </p>
             <h1 class="text-3xl font-semibold tracking-tight text-[var(--ui-text)] sm:text-4xl">
               {{ title }}
             </h1>
