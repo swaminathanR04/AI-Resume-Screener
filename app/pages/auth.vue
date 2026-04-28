@@ -36,7 +36,8 @@
       const parsedEmail = emailSchema.safeParse(state.email)
 
       if (!parsedEmail.success) {
-        emailError.value = parsedEmail.error.issues[0]?.message || 'Enter a valid work email address.'
+        emailError.value =
+          parsedEmail.error.issues[0]?.message || 'Enter a valid work email address.'
         return
       }
 
@@ -77,31 +78,29 @@
 <template>
   <div class="brand-auth-page flex min-h-screen w-full items-center justify-center px-4 py-12">
     <div class="grid w-full max-w-6xl gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center">
-      <section class="brand-auth-copy rounded-[2rem] border border-white/60 bg-white/55 p-6 backdrop-blur md:p-8 lg:p-10 dark:border-white/10 dark:bg-white/5">
+      <section
+        class="brand-auth-copy rounded-[2rem] border border-white/60 bg-white/55 p-6 backdrop-blur md:p-8 lg:p-10 dark:border-white/10 dark:bg-white/5"
+      >
         <div class="space-y-6">
           <CompanyBrand :show-tagline="true" align="left" />
 
           <div class="max-w-2xl space-y-5 text-[var(--ui-text)]">
             <p class="brand-auth-eyebrow">Hiring Workspace</p>
-            <h1 class="brand-auth-heading text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-            Modern hiring review for fast-moving teams.
+            <h1
+              class="brand-auth-heading text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl"
+            >
+              Modern hiring review for fast-moving teams.
             </h1>
             <p class="max-w-xl text-base leading-7 text-[var(--ui-text-muted)] sm:text-lg">
-            Centralize resume intake, applicant updates, and AI-assisted screening in one clean
-            workspace built for 40 Hours Inc.
+              Centralize resume intake, applicant updates, and AI-assisted screening in one clean
+              workspace.
             </p>
           </div>
 
           <div class="flex flex-wrap gap-3 text-sm text-[var(--ui-text-muted)]">
-            <span class="brand-auth-pill">
-              Resume Review
-            </span>
-            <span class="brand-auth-pill">
-              Applicant Notifications
-            </span>
-            <span class="brand-auth-pill">
-              AI Scoring
-            </span>
+            <span class="brand-auth-pill"> Resume Review </span>
+            <span class="brand-auth-pill"> Applicant Notifications </span>
+            <span class="brand-auth-pill"> AI Scoring </span>
           </div>
         </div>
       </section>
@@ -118,7 +117,9 @@
           <div class="space-y-4">
             <div class="flex items-center justify-between gap-4">
               <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--brand-accent)]">
+                <p
+                  class="text-xs font-semibold tracking-[0.28em] text-[var(--brand-accent)] uppercase"
+                >
                   40 Hours Inc.
                 </p>
                 <div class="mt-2 text-2xl font-bold text-[var(--ui-text)]">Secure Login</div>
@@ -133,7 +134,10 @@
             </p>
 
             <div class="brand-auth-note">
-              <UIcon name="i-heroicons-shield-check-20-solid" class="h-4 w-4 shrink-0 text-[var(--brand-accent)]" />
+              <UIcon
+                name="i-heroicons-shield-check-20-solid"
+                class="h-4 w-4 shrink-0 text-[var(--brand-accent)]"
+              />
               <span>One-time passcode authentication keeps access simple and secure.</span>
             </div>
           </div>
@@ -144,7 +148,7 @@
             v-if="!isEmailSent"
             name="email"
             label="Enter Email"
-            :error="emailError"
+            :error="emailError || undefined"
           >
             <UInput
               v-model="state.email"
@@ -161,7 +165,7 @@
             v-if="isEmailSent"
             name="otp"
             label="Verification Code"
-            :error="otpError"
+            :error="otpError || undefined"
             description="Enter the 6-digit code sent to your inbox."
           >
             <UPinInput
