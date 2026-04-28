@@ -18,7 +18,10 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<CreateApplicantNotificationBody>(event)
 
   if (!body.title?.trim() || !body.detail?.trim()) {
-    throw createError({ statusCode: 400, statusMessage: 'Notification title and detail are required.' })
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Notification title and detail are required.',
+    })
   }
 
   const notification = await prisma.applicantNotification.create({
