@@ -10,6 +10,7 @@ export type AdminResumeItem = {
   applicationCount: number
   score: number | null
   aiSummary: string | null
+  isRescoring?: boolean
 }
 
 type RescoreResumeResponse = {
@@ -171,6 +172,7 @@ export async function useAdminResumes() {
       reviewStatus,
       score,
       aiSummary,
+      isRescoring: false,
     }
 
     if (reviewStatus === 'new') {
@@ -185,6 +187,15 @@ export async function useAdminResumes() {
   }
 
   async function rescoreResume(userId: string) {
+    const resume = takeResume(userId)
+
+    if (resume && resume.reviewStatus === 'new') {
+      resume.isRescoring = true
+      resume.score = null
+      resume.aiSummary = 'In progress'
+      newResumes.value = sortResumes([...newResumes.value])
+    }
+
     const result = await $fetch<RescoreResumeResponse>(`/api/admin/resumes/${userId}/rescore`, {
       method: 'POST',
     })

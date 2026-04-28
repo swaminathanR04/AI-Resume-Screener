@@ -36,6 +36,7 @@ Rules:
 - Penalize missing required skills and vague or unsupported experience.
 - Follow the scoring weights and custom rules provided in the user prompt.
 - Apply custom rules only when there is explicit evidence in the resume.
+- Do not mention the applicant by name in the summary; say "The candidate" instead.
 - Keep the summary to 1 or 2 sentences.
 - matchedSkills and missingSkills should be concise phrases.
 - concerns should list concrete gaps or uncertainties.
@@ -57,6 +58,7 @@ function getScoringPrompt(input: ScoreResumeInput) {
     `Portfolio Weight: ${input.config.portfolioWeight}%`,
     `Minimum Score Threshold: ${input.config.minimumScore}/10`,
     `Custom Rules: ${input.config.customRules.join(' | ') || 'None'}`,
+    'Summary Naming Rule: Never use a personal name in the summary. Refer to the person as "The candidate".',
     `Job Title: ${input.job.title}`,
     `Location: ${input.job.location}`,
     `Employment Type: ${input.job.employmentType}`,

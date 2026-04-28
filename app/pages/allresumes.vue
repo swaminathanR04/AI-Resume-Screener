@@ -134,7 +134,7 @@
                   AI Reason
                 </p>
                 <p class="mt-2 text-sm leading-6 text-[var(--ui-text)]">
-                  {{ resume.aiSummary }}
+                  {{ resume.isRescoring ? 'In progress' : resume.aiSummary }}
                 </p>
               </div>
             </div>
@@ -152,7 +152,13 @@
                   class="text-base font-semibold"
                   :class="getResumeScoreTextClass(resume.score)"
                 >
-                  {{ resume.score === null ? 'Pending' : `${resume.score.toFixed(1)}/10` }}
+                  {{
+                    resume.isRescoring
+                      ? 'In progress'
+                      : resume.score === null
+                        ? 'Pending'
+                        : `${resume.score.toFixed(1)}/10`
+                  }}
                 </span>
               </div>
               <UButton
