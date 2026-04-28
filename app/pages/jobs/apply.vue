@@ -5,7 +5,6 @@
   const jobId = computed(() => Number(route.query.jobId || route.params.id || 0))
   const { getJob } = await useApplicantJobListings()
   const { submitApplication } = await useApplicantApplications()
-  const { pushNotification } = useApplicantPortal()
   const { data: applicantInfo } = await useFetch<{
     name: string | null
     phoneNumber: string | null
@@ -38,10 +37,13 @@
     try {
       const application = await submitApplication(job.value.id)
 
-      pushNotification(
-        `Applied to ${job.value.title}`,
-        `Your resume was submitted for the ${job.value.title} job listing.`
-      )
+      await $fetch('/api/applicants/notifications', {
+        method: 'POST',
+        body: {
+          title: `Applied to ${job.value.title}`,
+          detail: `Your resume was submitted for the ${job.value.title} job listing.`,
+        },
+      })
 
       toast.add({
         title: 'Application submitted',

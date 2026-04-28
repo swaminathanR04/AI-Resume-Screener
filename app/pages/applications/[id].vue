@@ -9,6 +9,50 @@
   const application = computed(() => getApplication(applicationId.value))
   const job = computed(() => getJob(application.value?.jobId || 0))
 
+  const statusLabel = computed(() => {
+    if (application.value?.reviewStatus === 'advanced') {
+      return 'Advanced'
+    }
+
+    if (application.value?.reviewStatus === 'rejected') {
+      return 'Rejected'
+    }
+
+    if (application.value?.reviewStatus === 'archived') {
+      return 'Archived'
+    }
+
+    return 'Under Review'
+  })
+
+  const statusColor = computed(() => {
+    if (application.value?.reviewStatus === 'advanced') {
+      return 'success'
+    }
+
+    if (application.value?.reviewStatus === 'rejected') {
+      return 'error'
+    }
+
+    return 'neutral'
+  })
+
+  const statusMessage = computed(() => {
+    if (application.value?.reviewStatus === 'advanced') {
+      return 'Your application has been advanced. Our team will contact you soon with next steps.'
+    }
+
+    if (application.value?.reviewStatus === 'rejected') {
+      return 'Your application was not selected. Thank you for applying.'
+    }
+
+    if (application.value?.reviewStatus === 'archived') {
+      return 'This application has been archived by the hiring team.'
+    }
+
+    return 'Your application has been submitted and is available for the hiring team to review.'
+  })
+
   async function withdraw() {
     if (!application.value) {
       return
@@ -57,13 +101,14 @@
 
       <UCard>
         <template #header>
-          <h2 class="text-lg font-semibold text-[var(--ui-text)]">Application Status</h2>
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-lg font-semibold text-[var(--ui-text)]">Application Status</h2>
+            <UBadge :color="statusColor" variant="soft">{{ statusLabel }}</UBadge>
+          </div>
         </template>
 
         <div class="space-y-3 text-sm text-[var(--ui-text-muted)]">
-          <p class="leading-6">
-            Your application has been submitted and is available for the hiring team to review.
-          </p>
+          <p class="leading-6">{{ statusMessage }}</p>
           <p class="leading-6">
             You can manage your saved resume from the resume page or withdraw this submission at any
             time.

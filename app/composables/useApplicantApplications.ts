@@ -4,6 +4,7 @@ export type ApplicantApplication = {
   title: string
   location: string
   employmentType: string
+  reviewStatus: 'new' | 'advanced' | 'rejected' | 'archived'
   appliedAt: string
   applied: string
   resumePath: string | null

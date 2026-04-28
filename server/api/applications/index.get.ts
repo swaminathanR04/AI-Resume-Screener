@@ -36,6 +36,7 @@ export default defineEventHandler(async (event) => {
     title: application.jobListing.jobTitle,
     location: application.jobListing.location,
     employmentType: application.jobListing.employmentType,
+    reviewStatus: application.reviewStatus,
     appliedAt: application.appliedAt,
     applied: application.appliedAt,
     resumePath: applicantInfo.resumePath,

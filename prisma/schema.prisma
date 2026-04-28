@@ -18,6 +18,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   applicantInfo ApplicantInfo?
+  notifications ApplicantNotification[]
 
   @@unique([email])
   @@map("user")
@@ -131,6 +132,18 @@ model AiScoringConfig {
   updatedAt        DateTime @updatedAt
 
   @@map("AI_Scoring_Config")
+}
+
+model ApplicantNotification {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  title     String
+  detail    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("Applicant_Notifications")
 }
 
 model AuditLogEntry {

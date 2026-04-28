@@ -2,6 +2,34 @@
   const toast = useToast()
   const { applications, withdrawApplication } = await useApplicantApplications()
 
+  function getStatusColor(reviewStatus: string) {
+    if (reviewStatus === 'advanced') {
+      return 'success'
+    }
+
+    if (reviewStatus === 'rejected') {
+      return 'error'
+    }
+
+    return 'neutral'
+  }
+
+  function getStatusLabel(reviewStatus: string) {
+    if (reviewStatus === 'advanced') {
+      return 'Advanced'
+    }
+
+    if (reviewStatus === 'rejected') {
+      return 'Rejected'
+    }
+
+    if (reviewStatus === 'archived') {
+      return 'Archived'
+    }
+
+    return 'Under Review'
+  }
+
   async function withdraw(id: number) {
     await withdrawApplication(id)
 
@@ -24,6 +52,11 @@
               <div>
                 <p class="font-semibold text-[var(--ui-text)]">{{ application.title }}</p>
                 <p class="text-sm text-[var(--ui-text-muted)]">{{ application.location }}</p>
+                <div class="mt-2">
+                  <UBadge :color="getStatusColor(application.reviewStatus)" variant="soft">
+                    {{ getStatusLabel(application.reviewStatus) }}
+                  </UBadge>
+                </div>
               </div>
 
               <div class="text-sm text-[var(--ui-text-muted)]">

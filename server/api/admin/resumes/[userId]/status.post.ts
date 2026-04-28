@@ -88,6 +88,22 @@ export default defineEventHandler(async (event) => {
   const statusLabel =
     reviewStatus === 'advanced' ? 'Advanced' : reviewStatus === 'rejected' ? 'Rejected' : 'Archived'
 
+  if (reviewStatus === 'advanced' || reviewStatus === 'rejected') {
+    const notificationTitle = reviewStatus === 'advanced' ? 'Application advanced' : 'Application rejected'
+    const notificationDetail =
+      reviewStatus === 'advanced'
+        ? `Your application for ${latestApplication.jobListing.jobTitle} has been advanced. Our team will contact you soon with next steps.`
+        : `Your application for ${latestApplication.jobListing.jobTitle} was rejected. Thank you for applying.`
+
+    await prisma.applicantNotification.create({
+      data: {
+        userId: applicant.user.id,
+        title: notificationTitle,
+        detail: notificationDetail,
+      },
+    })
+  }
+
   await createAuditLogEntry({
     actorType: 'Admin',
     actorName: getAuditActorName(session.user),
