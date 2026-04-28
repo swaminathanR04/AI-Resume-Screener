@@ -1,161 +1,179 @@
-# Nuxt Template (Better Auth + Prisma + SQLite)
+# AI Resume Screener
 
-A modern, production-ready Nuxt 4 template featuring a robust authentication system, ORM integration, and a clean UI foundation.
+This project lets applicants upload resumes and apply for jobs, while admins review resumes, run AI scoring, and manage the hiring flow.
 
-## Features
+## Quick Start
 
-- **Nuxt 4**: The latest and greatest from the Nuxt team.
-- **Better Auth**: Comprehensive authentication with **Email OTP** support.
-- **Prisma**: Type-safe ORM for interacting with the database.
-- **SQLite**: Lightweight, zero-configuration database, ideal for development and small-to-medium projects.
-- **Nuxt UI v3**: Beautiful, accessible, and customizable UI components built with Tailwind CSS.
-- **Nodemailer**: Pre-configured for sending verification emails via Gmail.
-
-## Stack
-
-- **Framework**: [Nuxt](https://nuxt.com/)
-- **Auth**: [Better Auth](https://www.better-auth.com/)
-- **ORM**: [Prisma](https://www.prisma.io/)
-- **Database**: [SQLite](https://sqlite.org/)
-- **UI Framework**: [Nuxt UI](https://ui3.nuxt.com/)
-- **Email**: [Nodemailer](https://nodemailer.com/)
-
-## Getting Started
-
-### Want to use the template?
-
-See the [Template Usage docs](docs/template_usage.md). Otherwise, feel free to keep moving with the setup steps!
-
-### 1. Clone the repository
+1. Clone the repo and install packages.
 
 ```bash
-git clone <your-repo-url>
-cd nuxt-template
-```
-
-### 2. Install dependencies
-
-This project uses `pnpm`, but you can use `npm` as well.
-
-```bash
+git clone <your-repository-url>
+cd AI-Resume-Screener
 pnpm install
 ```
 
-### 3. Setup Environment Variables
+2. Copy the env file.
 
-Copy the example environment file and fill in your details.
+macOS/Linux:
 
 ```bash
 cp .env.example .env
 ```
 
-Open `.env` and configure the following:
+Windows PowerShell:
 
-- `DATABASE_URL`: The SQLite connection string (default: `file:./dev.db`).
-- `BETTER_AUTH_SECRET`: A secure random string for encryption. You can generate one using `openssl rand -hex 32`.
-- `BETTER_AUTH_URL`: The base URL of your application (default: `http://localhost:3000`).
-- `EMAIL_USER`: Your Gmail address (for OTP delivery).
-- `EMAIL_PASS`: Your Gmail App Password. [How to generate an App Password](https://support.google.com/accounts/answer/185833).
-- `AI_PROVIDER`: The AI backend to use for resume scoring. Supported values are `ollama` and `openai`. Default: `ollama`.
-- `OLLAMA_BASE_URL`: Local Ollama server URL (default: `http://127.0.0.1:11434`).
-- `OLLAMA_MODEL`: Ollama model name for scoring (default: `llama3.2:3b`).
-- `OPENAI_API_KEY`: Your OpenAI-compatible API key for resume scoring.
-- `OPENAI_BASE_URL`: Optional override for an OpenAI-compatible endpoint (default: `https://api.openai.com/v1`).
-- `OPENAI_MODEL`: Optional model name for scoring (default: `gpt-4o-mini`).
+```powershell
+Copy-Item .env.example .env
+```
 
-### 4. Database Setup
+3. Update `.env` with these values:
 
-Initialize your SQLite database and run migrations. You will need to run this command anytime you need to change or create a database.
-If there are any migrations that need to be run, the command will ask for a name for the migration. You can simply hit enter, or name your migration.
+```bash
+DATABASE_URL=file:./dev.db
+BETTER_AUTH_SECRET=replace-with-a-random-secret
+BETTER_AUTH_URL=http://localhost:3000
+EMAIL_USER=your-smtp-email@example.com
+EMAIL_PASS=your-smtp-password-or-app-password
+EMAIL_FROM=your-smtp-email@example.com
+EMAIL_HOST=smtp.gmail.com
+UPLOAD_STORAGE_PATH=
+AI_PROVIDER=ollama
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=llama3.2:3b
+```
+
+4. Install and start Ollama.
+
+```bash
+ollama pull llama3.2:3b
+```
+
+5. Reset and seed the local database.
 
 ```bash
 pnpm prisma:reset
 ```
 
-### 5. Start the development server
+6. Start the app.
 
 ```bash
 pnpm dev
 ```
 
-Your application will be available at `http://localhost:3000`. This command also starts **Prisma Studio** automatically.
+The app runs at `http://localhost:3000`.
 
-### AI Resume Scoring
+## Local Login
 
-When an applicant submits for a job, the server now:
+Use this seeded admin account:
 
-- extracts plain text from the uploaded PDF resume,
-- compares it to the selected job listing with either a local Ollama model or an OpenAI-compatible model,
-- stores a `1-10` match score plus a short explanation and skill gaps on the application record.
+```text
+alice@example.com
+```
 
-The default setup uses Ollama locally, so there is no API key requirement if you have Ollama running on your machine.
+Login uses email OTP.
 
-To use Ollama locally:
+If that inbox is not real, get the OTP from Prisma Studio:
 
-1. Install Ollama from `https://ollama.com/download`
-2. Pull a model such as `ollama pull llama3.2:3b`
-3. Keep Ollama running locally
-4. Set `AI_PROVIDER=ollama` in `.env`
-5. Restart the Nuxt dev server
+1. Start the app with `pnpm dev`
+2. Open `http://localhost:3000/auth`
+3. Enter `alice@example.com`
+4. Open Prisma Studio
+5. Check the `Verification` table
+6. Copy the OTP and sign in
 
-To switch back to an OpenAI-compatible API instead, set `AI_PROVIDER=openai` and provide the `OPENAI_*` variables.
+## What Gets Seeded
 
-### 6. How to Login
+Running `pnpm prisma:reset` creates:
 
-Login requires an email address that already exists in the database.
+- admin user: `alice@example.com`
+- applicant user: `bob@example.com`
+- applicant user: `jamie.applicant@example.com`
+- one sample job listing
+- one sample resume for Bob
 
-- **Option A: Use the seeded user**
-  Go to `/auth` and log in with `email@example.com`.
-- **Option B: Use your own email**
-  Update `prisma/seed.ts` with your email, then run `pnpm prisma:reset` to re-seed.
+The sample resume file comes from [prisma/seed-assets/bob-builder-resume.pdf](c:/Users/swami/OneDrive/Desktop/CS%203354/AI-Resume-Screener/prisma/seed-assets/bob-builder-resume.pdf).
 
-**To get your OTP:**
+## Important Notes
 
-- Check your configured email inbox.
-- **Or**, check the **Prisma Studio** tab in your browser and look in the `Verification` table.
+### Admin access
 
-## Project Structure
+Admin access is hardcoded in [server/utils/user-role.ts](c:/Users/swami/OneDrive/Desktop/CS%203354/AI-Resume-Screener/server/utils/user-role.ts).
 
-- `app/`: Frontend code (pages, components, assets, composables).
-- `server/`: Backend code (API routes, authentication logic, database utilities).
-- `prisma/`: Database schema, migrations, and seed scripts.
-- `public/`: Static assets.
+You are treated as admin only if:
 
-## GitHub Actions Configuration
+- your name is `alice`, or
+- your email starts with `alice@`
 
-**Important**: You must update the GitHub Actions workflow to point to your own repository and AWS configuration.
+### Resume storage
 
-### Update GitHub Actions
+Resume PDFs are saved on disk.
 
-Add the following Secrets and Variables to your repository:
+- default folder: `.data/uploads`
+- path format: `users/<userId>/resumes/<uuid>.pdf`
+- database stores only the relative path
 
-1. **ACTIONS_ROLE_ARN (Secret)**:
+If `UPLOAD_STORAGE_PATH` is set, resumes are saved there instead.
 
-   ```yaml
-   arn:aws:iam::YOUR-AWS-ACCOUNT-ID:role/YOUR-ROLE-NAME
-   ```
+### Database reset
 
-2. **REPOSITORY (Variable)**:
+`pnpm prisma:reset` deletes and recreates your local database. Use it only for local development.
 
-   ```yaml
-   your-repository-name
-   ```
+## Common Commands
 
-Optionally, you may update the AWS region.
+Start dev server:
 
-3. **AWS Region** (line 26 in `.github/workflows/main.yml`):
-   ```yaml
-   aws-region: your-aws-region
-   ```
+```bash
+pnpm dev
+```
 
-### Required AWS Setup
+Build app:
 
-Before the GitHub Actions will work, you need:
+```bash
+pnpm build
+```
 
-1. **AWS ECR Repository**: Create a repository in Amazon ECR
-2. **IAM Role**: Create a role with GitHub Actions OIDC provider and ECR permissions
-3. **GitHub Secrets**: Ensure your repository has the necessary AWS permissions
+Preview production build:
 
-## License
+```bash
+pnpm preview
+```
 
-MIT
+Reset and reseed database:
+
+```bash
+pnpm prisma:reset
+```
+
+Regenerate Prisma client:
+
+```bash
+pnpm exec prisma generate
+```
+
+Run Prisma migrations:
+
+```bash
+pnpm exec prisma migrate dev
+```
+
+## If Something Breaks
+
+OTP email not arriving:
+
+- check `EMAIL_*` values
+- use a Gmail app password if needed
+- read the OTP from Prisma Studio for local testing
+
+Prisma model missing or undefined:
+
+```bash
+pnpm exec prisma generate
+```
+
+Then restart the dev server if needed.
+
+AI scoring not working:
+
+- make sure Ollama is running
+- make sure `llama3.2:3b` is pulled
+- restart the app after changing `.env`

@@ -64,7 +64,7 @@
               <span
                 class="text-base font-semibold"
                 :class="getResumeScoreTextClass(resume.score)"
-                >{{ resume.score === null ? 'Pending' : `${resume.score.toFixed(1)}/10` }}</span
+                >{{ resume.score === null ? '-/10' : `${resume.score.toFixed(1)}/10` }}</span
               >
             </div>
             <UButton

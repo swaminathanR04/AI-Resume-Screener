@@ -48,7 +48,7 @@
       time: formatRelativeTime(resume.submittedAt),
       details:
         resume.score === null
-          ? 'AI review pending.'
+          ? (resume.aiSummary || 'AI not configured.')
           : `Current AI score: ${resume.score.toFixed(1)}/10.`,
     }))
   )
@@ -80,7 +80,7 @@
       return latestResume.value.aiSummary
     }
 
-    return 'AI review has not completed yet for this resume.'
+    return 'AI not configured'
   })
 
   function getImageLink(user: { image: boolean; id: string }) {
@@ -268,7 +268,7 @@
                 <UBadge :color="latestResumeScoreBadgeColor" variant="soft">
                   {{
                     latestResume?.score === null || latestResume?.score === undefined
-                      ? 'Rank: Pending'
+                      ? 'Rank: -/10'
                       : `Rank: ${latestResume.score.toFixed(1)}/10`
                   }}
                 </UBadge>
@@ -296,7 +296,7 @@
                   <span class="font-semibold" :class="getResumeScoreTextClass(latestResume.score)">
                     {{
                       latestResume.score === null
-                        ? 'Pending'
+                        ? '-/10'
                         : `${latestResume.score.toFixed(1)}/10`
                     }}
                   </span>

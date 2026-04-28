@@ -85,7 +85,7 @@ export default defineEventHandler(async (event) => {
       actorName: getAuditActorName(session.user),
       action: 'Resume Re-scored',
       itemType: 'Candidate',
-      details: `${applicant.name || applicant.user.email} was re-scored for ${latestApplication.jobListing.jobTitle}, but no AI score was available.`,
+      details: `${applicant.name || applicant.user.email} was re-scored for ${latestApplication.jobListing.jobTitle}, but AI is not configured.`,
     })
 
     return {
@@ -94,7 +94,7 @@ export default defineEventHandler(async (event) => {
       applicantName: applicant.name || applicant.user.email,
       appliedRole: latestApplication.jobListing.jobTitle,
       score: null,
-      aiSummary: null,
+      aiSummary: 'AI not configured',
       aiMatchedSkills: [],
       aiMissingSkills: [],
       aiConcerns: [],

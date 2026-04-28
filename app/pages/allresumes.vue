@@ -156,7 +156,7 @@
                     resume.isRescoring
                       ? 'In progress'
                       : resume.score === null
-                        ? 'Pending'
+                        ? '-/10'
                         : `${resume.score.toFixed(1)}/10`
                   }}
                 </span>
