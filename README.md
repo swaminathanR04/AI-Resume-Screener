@@ -1,18 +1,47 @@
-# AI Resume Screener
+# AI Resume Screener (Better Auth + Prisma + SQLite)
 
-This project lets applicants upload resumes and apply for jobs, while admins review resumes, run AI scoring, and manage the hiring flow.
+A modern Nuxt 4 project for applicant resume uploads, admin resume review, AI-assisted scoring, and hiring workflow management.
 
-## Quick Start
+## Features
 
-1. Clone the repo and install packages.
+- **Nuxt 4**: Frontend and server routes in one app.
+- **Better Auth**: Email OTP authentication.
+- **Prisma**: Type-safe ORM for database access.
+- **SQLite**: Simple local database for development.
+- **Nuxt UI**: UI components for the applicant and admin dashboards.
+- **Nodemailer**: OTP email delivery.
+- **Ollama**: Local AI resume scoring.
+
+## Stack
+
+- **Framework**: Nuxt
+- **Auth**: Better Auth
+- **ORM**: Prisma
+- **Database**: SQLite
+- **UI Framework**: Nuxt UI
+- **Email**: Nodemailer
+- **AI Scoring**: Ollama
+
+## Getting Started
+
+### 1. Clone the repository
 
 ```bash
-git clone <your-repository-url>
+git clone <your-repo-url>
 cd AI-Resume-Screener
+```
+
+### 2. Install dependencies
+
+This project uses `pnpm`.
+
+```bash
 pnpm install
 ```
 
-2. Copy the env file.
+### 3. Set up environment variables
+
+Copy the example environment file.
 
 macOS/Linux:
 
@@ -26,7 +55,27 @@ Windows PowerShell:
 Copy-Item .env.example .env
 ```
 
-3. Update `.env` with these values:
+Open `.env` and configure the following:
+
+- `DATABASE_URL`: SQLite connection string. Default: `file:./dev.db`
+- `BETTER_AUTH_SECRET`: Secure random string for auth encryption
+- `BETTER_AUTH_URL`: App URL. Default: `http://localhost:3000`
+- `EMAIL_USER`: SMTP email account used for OTP emails
+- `EMAIL_PASS`: SMTP password or app password
+- `EMAIL_FROM`: Sender email address
+- `EMAIL_HOST`: SMTP host, such as `smtp.gmail.com`
+- `UPLOAD_STORAGE_PATH`: Optional custom folder for uploaded files. If blank, the app uses `.data/uploads`
+- `AI_PROVIDER`: Keep this as `ollama`
+- `OLLAMA_BASE_URL`: Ollama server URL. Default: `http://127.0.0.1:11434`
+- `OLLAMA_MODEL`: Ollama model name. Default: `llama3.2:3b`
+
+If you are using Gmail for OTP emails:
+
+- `EMAIL_USER`: your Gmail address
+- `EMAIL_PASS`: your Gmail App Password
+- Google guide for app passwords: https://support.google.com/accounts/answer/185833
+
+Example `.env` values:
 
 ```bash
 DATABASE_URL=file:./dev.db
@@ -42,48 +91,51 @@ OLLAMA_BASE_URL=http://127.0.0.1:11434
 OLLAMA_MODEL=llama3.2:3b
 ```
 
-4. Install and start Ollama.
+### 4. Start Ollama
+
+Install Ollama and pull the model used by the app:
 
 ```bash
 ollama pull llama3.2:3b
 ```
 
-5. Reset and seed the local database.
+If Ollama is not installed, the website still works, but AI reason text will show `AI not configured` and the score will show `-/10`.
+
+### 5. Database setup
+
+Initialize the local database, apply migrations, generate Prisma, and seed sample data:
 
 ```bash
 pnpm prisma:reset
 ```
 
-6. Start the app.
+This is a local development reset command. It recreates your local database.
+
+### 6. Start the development server
 
 ```bash
 pnpm dev
 ```
 
-The app runs at `http://localhost:3000`.
+The app runs at `http://localhost:3000`. This command also starts Prisma Studio.
 
-## Local Login
+## How to Login
 
-Use this seeded admin account:
+Login requires an email that exists in the seeded database.
 
-```text
-alice@example.com
-```
+- **Option A: Use the seeded admin**
+  Sign in with `alice@example.com`
+- **Option B: Use a different email**
+  Update `prisma/seed.ts`, then run `pnpm prisma:reset` again
 
-Login uses email OTP.
+To get the OTP:
 
-If that inbox is not real, get the OTP from Prisma Studio:
+- Check your configured email inbox
+- Or open Prisma Studio and read the OTP from the `Verification` table
 
-1. Start the app with `pnpm dev`
-2. Open `http://localhost:3000/auth`
-3. Enter `alice@example.com`
-4. Open Prisma Studio
-5. Check the `Verification` table
-6. Copy the OTP and sign in
+## Seeded Data
 
-## What Gets Seeded
-
-Running `pnpm prisma:reset` creates:
+The seed creates:
 
 - admin user: `alice@example.com`
 - applicant user: `bob@example.com`
@@ -91,22 +143,22 @@ Running `pnpm prisma:reset` creates:
 - one sample job listing
 - one sample resume for Bob
 
-The sample resume file comes from [prisma/seed-assets/bob-builder-resume.pdf](c:/Users/swami/OneDrive/Desktop/CS%203354/AI-Resume-Screener/prisma/seed-assets/bob-builder-resume.pdf).
+The sample PDF is included in the repo at `prisma/seed-assets/bob-builder-resume.pdf`, so other people will get it when they clone the repository.
 
 ## Important Notes
 
 ### Admin access
 
-Admin access is hardcoded in [server/utils/user-role.ts](c:/Users/swami/OneDrive/Desktop/CS%203354/AI-Resume-Screener/server/utils/user-role.ts).
+Admin access is currently hardcoded in `server/utils/user-role.ts`.
 
-You are treated as admin only if:
+You are treated as an admin only if:
 
 - your name is `alice`, or
 - your email starts with `alice@`
 
 ### Resume storage
 
-Resume PDFs are saved on disk.
+Uploaded resume PDFs are saved on disk.
 
 - default folder: `.data/uploads`
 - path format: `users/<userId>/resumes/<uuid>.pdf`
@@ -114,11 +166,22 @@ Resume PDFs are saved on disk.
 
 If `UPLOAD_STORAGE_PATH` is set, resumes are saved there instead.
 
-### Database reset
+Sample PDFs that should exist for everyone, like Bob's seeded resume, should stay in the repository under `prisma/seed-assets/`.
 
-`pnpm prisma:reset` deletes and recreates your local database. Use it only for local development.
+### GitHub and other PCs
+
+This repo should work on other computers as long as the setup steps are followed.
+
+Commit source files, migrations, seed assets, and docs.
+Do not commit local-only files like `.env`, `.nuxt`, `.output`, `.data`, `node_modules`, or `dev.db`.
 
 ## Common Commands
+
+Install dependencies:
+
+```bash
+pnpm install
+```
 
 Start dev server:
 
@@ -156,15 +219,23 @@ Run Prisma migrations:
 pnpm exec prisma migrate dev
 ```
 
+## Project Structure
+
+- `app/`: Frontend pages, components, composables, and UI logic
+- `server/`: API routes, auth logic, Prisma access, AI scoring, and file handling
+- `prisma/`: Schema, migrations, seed script, generated client, and seed assets
+- `public/`: Static assets
+- `docs/`: Supporting project notes
+
 ## If Something Breaks
 
-OTP email not arriving:
+### OTP email not arriving
 
 - check `EMAIL_*` values
 - use a Gmail app password if needed
 - read the OTP from Prisma Studio for local testing
 
-Prisma model missing or undefined:
+### Prisma model missing or undefined
 
 ```bash
 pnpm exec prisma generate
@@ -172,7 +243,7 @@ pnpm exec prisma generate
 
 Then restart the dev server if needed.
 
-AI scoring not working:
+### AI scoring not working
 
 - make sure Ollama is running
 - make sure `llama3.2:3b` is pulled
