@@ -18,6 +18,10 @@
   const { displayName } = useProfileDisplayName(
     computed(() => currentUser.value?.name || currentUser.value?.email || 'Admin User')
   )
+  const dismissedNotificationIds = useCookie<string[]>('admin-dismissed-notifications', {
+    default: () => [],
+    sameSite: 'lax',
+  })
 
   const allResumes = computed(() =>
     [
@@ -40,17 +44,20 @@
   )
 
   const notifications = computed(() =>
-    appliedResumes.value.slice(0, 5).map((resume) => ({
-      id: resume.userId,
-      sender: resume.applicantName || 'Applicant',
-      subject: 'New application received',
-      preview: `${resume.applicantName || 'A candidate'} applied for ${resume.appliedRole}.`,
-      time: formatRelativeTime(resume.submittedAt),
-      details:
-        resume.score === null
-          ? (resume.aiSummary || 'AI not configured.')
-          : `Current AI score: ${resume.score.toFixed(1)}/10.`,
-    }))
+    appliedResumes.value
+      .map((resume) => ({
+        id: `${resume.userId}:${resume.submittedAt}`,
+        sender: resume.applicantName || 'Applicant',
+        subject: 'New application received',
+        preview: `${resume.applicantName || 'A candidate'} applied for ${resume.appliedRole}.`,
+        time: formatRelativeTime(resume.submittedAt),
+        details:
+          resume.score === null
+            ? (resume.aiSummary || 'AI not configured.')
+            : `Current AI score: ${resume.score.toFixed(1)}/10.`,
+      }))
+      .filter((notification) => !dismissedNotificationIds.value.includes(notification.id))
+      .slice(0, 5)
   )
 
   const latestResumeScoreBadgeColor = computed(() => {
@@ -107,6 +114,14 @@
 
   function formatSubmittedAt(value: string) {
     return new Date(value).toLocaleString()
+  }
+
+  function dismissNotification(notificationId: string) {
+    if (dismissedNotificationIds.value.includes(notificationId)) {
+      return
+    }
+
+    dismissedNotificationIds.value = [...dismissedNotificationIds.value, notificationId]
   }
 </script>
 
@@ -189,7 +204,7 @@
             <div
               v-for="message in notifications"
               :key="message.id"
-              class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] p-4"
+              class="group rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] p-4"
             >
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
@@ -198,6 +213,7 @@
                   </p>
                   <p class="mt-1 truncate text-sm text-[var(--ui-text)]">{{ message.subject }}</p>
                 </div>
+
                 <span class="text-xs text-[var(--ui-text-muted)]">{{ message.time }}</span>
               </div>
               <p class="mt-2 text-sm leading-6 text-[var(--ui-text-muted)]">
@@ -206,6 +222,17 @@
               <p class="mt-2 text-xs leading-5 text-[var(--ui-text-muted)]">
                 {{ message.details }}
               </p>
+              <div class="mt-3 flex justify-end">
+                <UButton
+                  color="neutral"
+                  variant="ghost"
+                  icon="i-heroicons-trash-20-solid"
+                  square
+                  class="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                  aria-label="Dismiss notification"
+                  @click="dismissNotification(message.id)"
+                />
+              </div>
             </div>
 
             <div

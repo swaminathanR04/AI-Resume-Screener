@@ -6,6 +6,9 @@
     createdAt: string
   }
 
+  const toast = useToast()
+  const deletingNotificationId = ref<number | null>(null)
+
   const { data, pending, error, refresh } = await useFetch<ApplicantNotification[]>(
     '/api/applicants/notifications',
     {
@@ -14,6 +17,36 @@
   )
 
   const notifications = computed(() => data.value || [])
+
+  async function deleteNotification(notificationId: number) {
+    if (deletingNotificationId.value === notificationId) {
+      return
+    }
+
+    deletingNotificationId.value = notificationId
+
+    try {
+      await $fetch(`/api/applicants/notifications/${notificationId}`, {
+        method: 'DELETE',
+      })
+
+      data.value = notifications.value.filter((notification) => notification.id !== notificationId)
+
+      toast.add({
+        title: 'Notification deleted',
+        color: 'success',
+      })
+    } catch (deleteError: any) {
+      toast.add({
+        title: 'Unable to delete notification',
+        description:
+          deleteError?.data?.statusMessage || deleteError?.message || 'Please try again.',
+        color: 'error',
+      })
+    } finally {
+      deletingNotificationId.value = null
+    }
+  }
 </script>
 
 <template>
@@ -47,8 +80,22 @@
       <UCard v-for="notification in notifications" :key="notification.id">
         <div class="space-y-2">
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <p class="font-semibold text-[var(--ui-text)]">{{ notification.title }}</p>
-            <span class="text-xs text-[var(--ui-text-muted)]">{{ new Date(notification.createdAt).toLocaleString() }}</span>
+            <div>
+              <p class="font-semibold text-[var(--ui-text)]">{{ notification.title }}</p>
+              <span class="text-xs text-[var(--ui-text-muted)]">{{
+                new Date(notification.createdAt).toLocaleString()
+              }}</span>
+            </div>
+
+            <UButton
+              color="neutral"
+              variant="ghost"
+              icon="i-heroicons-trash-20-solid"
+              label="Delete"
+              :loading="deletingNotificationId === notification.id"
+              :disabled="deletingNotificationId !== null"
+              @click="deleteNotification(notification.id)"
+            />
           </div>
           <p class="text-sm leading-6 text-[var(--ui-text-muted)]">{{ notification.detail }}</p>
         </div>
