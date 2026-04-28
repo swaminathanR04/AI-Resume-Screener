@@ -84,6 +84,11 @@
         <div class="space-y-6">
           <CompanyBrand :show-tagline="true" align="left" />
 
+          <div class="brand-auth-client-strip">
+            <span class="brand-auth-client-label">Built by 40 Hours Inc. for</span>
+            <GoogleWordmark />
+          </div>
+
           <div class="max-w-2xl space-y-5 text-[var(--ui-text)]">
             <p class="brand-auth-eyebrow">Hiring Workspace</p>
             <h1

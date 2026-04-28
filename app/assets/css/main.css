@@ -95,6 +95,25 @@ h3,
   box-shadow: 0 24px 60px rgba(23, 52, 87, 0.08);
 }
 
+.brand-auth-client-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  align-self: flex-start;
+  border: 1px solid color-mix(in srgb, var(--brand-ink) 12%, white);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 0.75rem 1rem;
+  box-shadow: 0 12px 28px rgba(23, 52, 87, 0.08);
+}
+
+.brand-auth-client-label {
+  color: var(--ui-text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .brand-auth-eyebrow {
   margin: 0;
   color: var(--brand-accent);
@@ -167,6 +186,32 @@ h3,
 
 .brand-auth-pin {
   padding-top: 0.2rem;
+}
+
+.google-wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.google-wordmark__blue {
+  color: #4285f4;
+}
+
+.google-wordmark__red {
+  color: #ea4335;
+}
+
+.google-wordmark__yellow {
+  color: #fbbc05;
+}
+
+.google-wordmark__green {
+  color: #34a853;
 }
 
 .company-brand {
@@ -274,6 +319,13 @@ h3,
   border-color: rgba(255, 255, 255, 0.08);
   background: rgba(9, 17, 29, 0.5);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.26);
+}
+
+.dark .brand-auth-client-strip,
+:root.dark .brand-auth-client-strip {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: none;
 }
 
 .dark .brand-auth-heading,
