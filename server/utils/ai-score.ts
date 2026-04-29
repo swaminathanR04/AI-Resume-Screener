@@ -37,7 +37,9 @@ Rules:
 - Follow the scoring weights and custom rules provided in the user prompt.
 - Apply custom rules only when there is explicit evidence in the resume.
 - Do not mention the applicant by name in the summary; say "The candidate" instead.
-- Keep the summary to 1 or 2 sentences.
+- The summary must explain why the candidate is or is not a good match.
+- The summary should mention the strongest relevant qualifications and the most important gaps.
+- Keep the summary to 2 to 4 sentences.
 - matchedSkills and missingSkills should be concise phrases.
 - concerns should list concrete gaps or uncertainties.
 
@@ -59,6 +61,7 @@ function getScoringPrompt(input: ScoreResumeInput) {
     `Minimum Score Threshold: ${input.config.minimumScore}/10`,
     `Custom Rules: ${input.config.customRules.join(' | ') || 'None'}`,
     'Summary Naming Rule: Never use a personal name in the summary. Refer to the person as "The candidate".',
+    'Summary Quality Rule: Explain what the candidate matches well and what the candidate lacks, using concrete evidence from the resume.',
     `Job Title: ${input.job.title}`,
     `Location: ${input.job.location}`,
     `Employment Type: ${input.job.employmentType}`,
@@ -111,6 +114,85 @@ function coerceAiList(value: unknown) {
     .filter(Boolean)
 }
 
+function getScoreBandSummary(score: number) {
+  if (score <= 3) {
+    return 'The candidate appears to be a weak match for the role based on the provided resume.'
+  }
+
+  if (score <= 6) {
+    return 'The candidate appears to be a partial match for the role based on the provided resume.'
+  }
+
+  if (score <= 8) {
+    return 'The candidate appears to be a strong match for the role based on the provided resume.'
+  }
+
+  return 'The candidate appears to be an excellent match for the role based on the provided resume.'
+}
+
+function formatEvidenceList(items: string[], limit: number) {
+  const filtered = items.map((item) => item.trim()).filter(Boolean).slice(0, limit)
+
+  if (filtered.length === 0) {
+    return ''
+  }
+
+  if (filtered.length === 1) {
+    return filtered[0]
+  }
+
+  if (filtered.length === 2) {
+    return `${filtered[0]} and ${filtered[1]}`
+  }
+
+  return `${filtered.slice(0, -1).join(', ')}, and ${filtered[filtered.length - 1]}`
+}
+
+function buildFallbackSummary(candidate: Record<string, unknown>) {
+  const score = typeof candidate.score === 'number' && Number.isFinite(candidate.score) ? candidate.score : null
+  const matchedSkills = coerceAiList(candidate.matchedSkills)
+  const missingSkills = coerceAiList(candidate.missingSkills)
+  const concerns = coerceAiList(candidate.concerns)
+
+  const parts: string[] = []
+
+  if (matchedSkills.length > 0) {
+    parts.push(`The candidate shows relevant experience in ${formatEvidenceList(matchedSkills, 3)}.`)
+  } else if (score !== null) {
+    parts.push(getScoreBandSummary(score))
+  }
+
+  if (missingSkills.length > 0) {
+    parts.push(`The main gaps are ${formatEvidenceList(missingSkills, 3)}.`)
+  }
+
+  if (concerns.length > 0) {
+    parts.push(`Other concerns include ${formatEvidenceList(concerns, 2)}.`)
+  }
+
+  if (parts.length > 0) {
+    return parts.join(' ')
+  }
+
+  if (score !== null) {
+    return getScoreBandSummary(score)
+  }
+
+  return 'The candidate was scored based on the provided resume and job requirements.'
+}
+
+function coerceAiSummary(candidate: Record<string, unknown>) {
+  const possibleSummary = [candidate.summary, candidate.reason, candidate.reasoning, candidate.aiReason].find(
+    (value): value is string => typeof value === 'string' && value.trim().length > 0
+  )
+
+  if (possibleSummary) {
+    return possibleSummary.trim()
+  }
+
+  return buildFallbackSummary(candidate)
+}
+
 function normalizeAiScorePayload(payload: unknown) {
   if (!payload || typeof payload !== 'object') {
     return payload
@@ -120,6 +202,7 @@ function normalizeAiScorePayload(payload: unknown) {
 
   return {
     ...candidate,
+    summary: coerceAiSummary(candidate),
     matchedSkills: coerceAiList(candidate.matchedSkills),
     missingSkills: coerceAiList(candidate.missingSkills),
     concerns: coerceAiList(candidate.concerns),
