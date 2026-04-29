@@ -131,7 +131,10 @@ function getScoreBandSummary(score: number) {
 }
 
 function formatEvidenceList(items: string[], limit: number) {
-  const filtered = items.map((item) => item.trim()).filter(Boolean).slice(0, limit)
+  const filtered = items
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, limit)
 
   if (filtered.length === 0) {
     return ''
@@ -149,7 +152,8 @@ function formatEvidenceList(items: string[], limit: number) {
 }
 
 function buildFallbackSummary(candidate: Record<string, unknown>) {
-  const score = typeof candidate.score === 'number' && Number.isFinite(candidate.score) ? candidate.score : null
+  const score =
+    typeof candidate.score === 'number' && Number.isFinite(candidate.score) ? candidate.score : null
   const matchedSkills = coerceAiList(candidate.matchedSkills)
   const missingSkills = coerceAiList(candidate.missingSkills)
   const concerns = coerceAiList(candidate.concerns)
@@ -157,7 +161,9 @@ function buildFallbackSummary(candidate: Record<string, unknown>) {
   const parts: string[] = []
 
   if (matchedSkills.length > 0) {
-    parts.push(`The candidate shows relevant experience in ${formatEvidenceList(matchedSkills, 3)}.`)
+    parts.push(
+      `The candidate shows relevant experience in ${formatEvidenceList(matchedSkills, 3)}.`
+    )
   } else if (score !== null) {
     parts.push(getScoreBandSummary(score))
   }
@@ -182,9 +188,12 @@ function buildFallbackSummary(candidate: Record<string, unknown>) {
 }
 
 function coerceAiSummary(candidate: Record<string, unknown>) {
-  const possibleSummary = [candidate.summary, candidate.reason, candidate.reasoning, candidate.aiReason].find(
-    (value): value is string => typeof value === 'string' && value.trim().length > 0
-  )
+  const possibleSummary = [
+    candidate.summary,
+    candidate.reason,
+    candidate.reasoning,
+    candidate.aiReason,
+  ].find((value): value is string => typeof value === 'string' && value.trim().length > 0)
 
   if (possibleSummary) {
     return possibleSummary.trim()

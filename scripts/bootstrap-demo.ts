@@ -47,7 +47,12 @@ async function ensureSeededJobListing() {
 }
 
 async function ensureBobResume(userId: string) {
-  const bobResumeSeedPath = path.join(process.cwd(), 'prisma', 'seed-assets', 'bob-builder-resume.pdf')
+  const bobResumeSeedPath = path.join(
+    process.cwd(),
+    'prisma',
+    'seed-assets',
+    'bob-builder-resume.pdf'
+  )
 
   if (!fs.existsSync(bobResumeSeedPath)) {
     console.warn(`Skipping seeded resume copy because ${bobResumeSeedPath} was not found.`)
