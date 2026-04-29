@@ -3,6 +3,44 @@ import path from 'node:path'
 import { prisma } from '../server/utils/prisma'
 import { getUploadStoragePath } from '../server/utils/upload-storage'
 
+function resolveSeedAssetFileName(assetFileNames: string[]) {
+  const seedAssetsDirectory = path.join(process.cwd(), 'prisma', 'seed-assets')
+
+  if (!fs.existsSync(seedAssetsDirectory)) {
+    return null
+  }
+
+  const availableFiles = new Set(fs.readdirSync(seedAssetsDirectory))
+
+  for (const assetFileName of assetFileNames) {
+    if (availableFiles.has(assetFileName)) {
+      return assetFileName
+    }
+  }
+
+  return null
+}
+
+async function ensureSeededProfileImage(userId: string, assetFileNames: string[]) {
+  const resolvedAssetFileName = resolveSeedAssetFileName(assetFileNames)
+
+  if (!resolvedAssetFileName) {
+    return null
+  }
+
+  const seedAssetPath = path.join(process.cwd(), 'prisma', 'seed-assets', resolvedAssetFileName)
+
+  const imageDirectory = path.join(getUploadStoragePath(), 'users', userId, 'images')
+  const storedPath = path.join(imageDirectory, resolvedAssetFileName)
+  const relativePath = path.join('users', userId, 'images', resolvedAssetFileName)
+
+  await fs.promises.rm(imageDirectory, { recursive: true, force: true })
+  await fs.promises.mkdir(imageDirectory, { recursive: true })
+  await fs.promises.copyFile(seedAssetPath, storedPath)
+
+  return relativePath
+}
+
 async function main() {
   console.log('Start seeding...')
 
@@ -24,6 +62,22 @@ async function main() {
       emailVerified: true,
     },
   })
+
+  const aliceImageRelativePath = await ensureSeededProfileImage(
+    adminUser.id,
+    ['alice-profile.png', 'ALICE-PFP.png', 'Alice-pfp.png', 'alice-pfp.png']
+  )
+
+  if (aliceImageRelativePath) {
+    await prisma.user.update({
+      where: {
+        id: adminUser.id,
+      },
+      data: {
+        image: aliceImageRelativePath,
+      },
+    })
+  }
 
   const bobUser = await prisma.user.upsert({
     where: {
