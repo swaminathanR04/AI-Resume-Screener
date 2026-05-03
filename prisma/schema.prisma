@@ -8,13 +8,13 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(uuid())
+  id            String                  @id @default(uuid())
   name          String
   email         String
-  emailVerified Boolean        @default(false)
+  emailVerified Boolean                 @default(false)
   image         String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
   sessions      Session[]
   accounts      Account[]
   applicantInfo ApplicantInfo?
@@ -101,19 +101,21 @@ model ApplicantInfo {
 }
 
 model ApplicantJobListing {
-  applicantInfoId Int
-  jobListingId    Int
-  appliedAt       DateTime      @default(now())
-  reviewStatus    String        @default("new")
-  aiScore         Int?
-  aiSummary       String?
-  aiMatchedSkills String?
-  aiMissingSkills String?
-  aiConcerns      String?
-  aiScoredAt      DateTime?
-  aiModel         String?
-  applicantInfo   ApplicantInfo @relation(fields: [applicantInfoId], references: [id], onDelete: Cascade)
-  jobListing      JobListing    @relation(fields: [jobListingId], references: [id], onDelete: Cascade)
+  applicantInfoId  Int
+  jobListingId     Int
+  appliedAt        DateTime      @default(now())
+  reviewStatus     String        @default("new")
+  aiScore          Int?
+  aiSummary        String?
+  adminScoreReason String?
+  adminScoreAt     DateTime?
+  aiMatchedSkills  String?
+  aiMissingSkills  String?
+  aiConcerns       String?
+  aiScoredAt       DateTime?
+  aiModel          String?
+  applicantInfo    ApplicantInfo @relation(fields: [applicantInfoId], references: [id], onDelete: Cascade)
+  jobListing       JobListing    @relation(fields: [jobListingId], references: [id], onDelete: Cascade)
 
   @@id([applicantInfoId, jobListingId])
   @@index([jobListingId])

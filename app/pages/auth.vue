@@ -3,6 +3,7 @@
   import { authClient } from '../utils/auth-client'
 
   const toast = useToast()
+  const colorMode = useColorMode()
   const isEmailSent = ref(false)
 
   const state = reactive({
@@ -30,6 +31,18 @@
     },
     { deep: true }
   )
+
+  const colorModeIcon = computed(() =>
+    colorMode.value === 'dark' ? 'i-heroicons-sun-20-solid' : 'i-heroicons-moon-20-solid'
+  )
+
+  const colorModeLabel = computed(() =>
+    colorMode.value === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+  )
+
+  function toggleColorMode() {
+    colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
+  }
 
   async function handleSubmit() {
     if (!isEmailSent.value) {
@@ -114,7 +127,7 @@
         class="brand-auth-card w-full justify-self-center"
         :ui="{
           root: 'overflow-hidden',
-          header: 'border-b border-white/10 px-7 py-6 sm:px-8 sm:py-7',
+          header: 'border-b border-[var(--ui-border)] px-7 py-6 sm:px-8 sm:py-7',
           body: 'px-7 py-7 sm:px-8 sm:py-8',
         }"
       >
@@ -129,8 +142,20 @@
                 </p>
                 <div class="mt-2 text-2xl font-bold text-[var(--ui-text)]">Secure Login</div>
               </div>
-              <div class="brand-auth-lockup">
-                <UIcon name="i-heroicons-lock-closed-20-solid" class="h-5 w-5" />
+              <div class="flex items-center gap-2">
+                <ClientOnly>
+                  <UButton
+                    color="neutral"
+                    variant="soft"
+                    :icon="colorModeIcon"
+                    square
+                    :aria-label="colorModeLabel"
+                    @click="toggleColorMode"
+                  />
+                </ClientOnly>
+                <div class="brand-auth-lockup">
+                  <UIcon name="i-heroicons-lock-closed-20-solid" class="h-5 w-5" />
+                </div>
               </div>
             </div>
 

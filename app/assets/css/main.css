@@ -84,11 +84,17 @@ h3,
 }
 
 .brand-auth-card {
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(186, 207, 230, 0.72);
   border-radius: 2rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(242, 247, 252, 0.94) 100%);
+  box-shadow: 0 30px 80px rgba(23, 52, 87, 0.14);
+  backdrop-filter: blur(18px);
+}
+
+.dark .brand-auth-card {
+  border-color: rgba(255, 255, 255, 0.12);
   background: linear-gradient(180deg, rgba(19, 37, 61, 0.98) 0%, rgba(34, 46, 66, 0.94) 100%);
   box-shadow: 0 30px 80px rgba(23, 52, 87, 0.24);
-  backdrop-filter: blur(18px);
 }
 
 .brand-auth-copy {
@@ -141,8 +147,14 @@ h3,
   justify-content: center;
   width: 2.85rem;
   height: 2.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(186, 207, 230, 0.72);
   border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: color-mix(in srgb, var(--brand-ink) 88%, black);
+}
+
+.dark .brand-auth-lockup {
+  border-color: rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.06);
   color: white;
 }
@@ -151,24 +163,40 @@ h3,
   display: flex;
   align-items: flex-start;
   gap: 0.55rem;
-  border: 1px solid rgba(83, 179, 255, 0.18);
+  border: 1px solid rgba(83, 179, 255, 0.24);
   border-radius: 1rem;
-  background: rgba(53, 167, 234, 0.08);
+  background: rgba(53, 167, 234, 0.12);
   padding: 0.85rem 0.95rem;
-  color: rgba(236, 244, 255, 0.9);
+  color: color-mix(in srgb, var(--brand-ink) 78%, black);
   font-size: 0.9rem;
   line-height: 1.5;
+}
+
+.dark .brand-auth-note {
+  border-color: rgba(83, 179, 255, 0.18);
+  background: rgba(53, 167, 234, 0.08);
+  color: rgba(236, 244, 255, 0.9);
 }
 
 .brand-auth-input :is(input) {
   min-height: 3.5rem;
   border-radius: 1rem;
+  border-color: rgba(116, 154, 204, 0.38);
+  background: rgba(255, 255, 255, 0.85);
+  color: color-mix(in srgb, var(--brand-ink) 86%, black);
+}
+
+.brand-auth-input :is(input)::placeholder {
+  color: rgba(94, 115, 145, 0.72);
+}
+
+.dark .brand-auth-input :is(input) {
   border-color: rgba(116, 154, 204, 0.26);
   background: rgba(248, 251, 255, 0.1);
   color: white;
 }
 
-.brand-auth-input :is(input)::placeholder {
+.dark .brand-auth-input :is(input)::placeholder {
   color: rgba(219, 230, 247, 0.52);
 }
 
