@@ -46,6 +46,47 @@ async function ensureSeededJobListing() {
   })
 }
 
+function resolveSeedAssetFileName(assetFileNames: string[]) {
+  const seedAssetsDirectory = path.join(process.cwd(), 'prisma', 'seed-assets')
+
+  if (!fs.existsSync(seedAssetsDirectory)) {
+    return null
+  }
+
+  const availableFiles = new Set(fs.readdirSync(seedAssetsDirectory))
+
+  for (const assetFileName of assetFileNames) {
+    if (availableFiles.has(assetFileName)) {
+      return assetFileName
+    }
+  }
+
+  return null
+}
+
+async function ensureSeededProfileImage(userId: string, assetFileNames: string[]) {
+  const resolvedAssetFileName = resolveSeedAssetFileName(assetFileNames)
+
+  if (!resolvedAssetFileName) {
+    console.warn('Skipping seeded profile image copy because no matching Alice seed image was found.')
+    return null
+  }
+
+  const seedAssetPath = path.join(process.cwd(), 'prisma', 'seed-assets', resolvedAssetFileName)
+
+  const imageDirectory = path.join(getUploadStoragePath(), 'users', userId, 'images')
+  const storedPath = path.join(imageDirectory, resolvedAssetFileName)
+  const relativePath = path.join('users', userId, 'images', resolvedAssetFileName)
+
+  await fs.promises.mkdir(imageDirectory, { recursive: true })
+
+  if (!fs.existsSync(storedPath)) {
+    await fs.promises.copyFile(seedAssetPath, storedPath)
+  }
+
+  return relativePath
+}
+
 async function ensureBobResume(userId: string) {
   const bobResumeSeedPath = path.join(
     process.cwd(),
@@ -81,6 +122,23 @@ async function main() {
   const applicantUser = await ensureUser('jamie.applicant@example.com', 'Jamie Applicant')
   const seededJobListing = await ensureSeededJobListing()
   const bobResumeRelativePath = await ensureBobResume(bobUser.id)
+  const aliceImageRelativePath = await ensureSeededProfileImage(adminUser.id, [
+    'alice-profile.png',
+    'ALICE-PFP.png',
+    'Alice-pfp.png',
+    'alice-pfp.png',
+  ])
+
+  if (aliceImageRelativePath) {
+    await prisma.user.update({
+      where: {
+        id: adminUser.id,
+      },
+      data: {
+        image: aliceImageRelativePath,
+      },
+    })
+  }
 
   const bobApplicantInfo = await prisma.applicantInfo.upsert({
     where: {

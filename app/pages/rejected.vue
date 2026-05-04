@@ -38,18 +38,33 @@
             <p class="text-sm text-[var(--ui-text-muted)]">
               Submitted {{ new Date(resume.submittedAt).toLocaleString() }}
             </p>
-            <div
-              v-if="resume.aiSummary"
-              class="max-w-2xl rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-4 py-3"
-            >
-              <p
-                class="text-xs font-medium tracking-[0.12em] text-[var(--ui-text-muted)] uppercase"
+            <div class="max-w-2xl space-y-3">
+              <div
+                v-if="resume.aiSummary"
+                class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-4 py-3"
               >
-                AI Reason
-              </p>
-              <p class="mt-2 text-sm leading-6 text-[var(--ui-text)]">
-                {{ resume.aiSummary }}
-              </p>
+                <p
+                  class="text-xs font-medium tracking-[0.12em] text-[var(--ui-text-muted)] uppercase"
+                >
+                  AI Reason
+                </p>
+                <p class="mt-2 text-sm leading-6 text-[var(--ui-text)]">
+                  {{ resume.aiSummary }}
+                </p>
+              </div>
+              <div
+                v-if="resume.manualScoreReason"
+                class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-4 py-3"
+              >
+                <p
+                  class="text-xs font-medium tracking-[0.12em] text-[var(--ui-text-muted)] uppercase"
+                >
+                  Admin Reason
+                </p>
+                <p class="mt-2 text-sm leading-6 text-[var(--ui-text)]">
+                  {{ resume.manualScoreReason }}
+                </p>
+              </div>
             </div>
           </div>
 

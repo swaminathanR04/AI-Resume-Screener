@@ -25,13 +25,18 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'File missing' })
   }
 
+  const originalExtension = file.filename ? path.extname(file.filename).toLowerCase() : ''
+  const safeExtension = ['.png', '.jpg', '.jpeg', '.gif', '.webp'].includes(originalExtension)
+    ? originalExtension
+    : ''
+
   const dirPath = path.join(getUploadStoragePath(), 'users', session.user.id, 'images')
 
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true })
   }
 
-  const randomImageId = crypto.randomUUID()
+  const randomImageId = `${crypto.randomUUID()}${safeExtension}`
 
   const filePath = path.join(dirPath, randomImageId)
 

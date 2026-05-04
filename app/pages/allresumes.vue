@@ -1,6 +1,12 @@
 <script setup lang="ts">
   const toast = useToast()
   const isRescoring = ref<string | null>(null)
+  const isManualScoreModalOpen = ref(false)
+  const isSavingManualScore = ref(false)
+  const selectedResumeId = ref<string | null>(null)
+  const selectedApplicantName = ref('')
+  const manualScore = ref<number | null>(null)
+  const manualReason = ref('')
   const {
     newResumes,
     pending,
@@ -8,8 +14,38 @@
     refreshResumes,
     moveResume,
     rescoreResume,
+    setManualResumeScore,
     getResumeScoreTextClass,
   } = await useAdminResumes()
+
+  const selectedResume = computed(
+    () => newResumes.value.find((resume) => resume.userId === selectedResumeId.value) || null
+  )
+
+  const manualReasonError = computed(() => {
+    if (!isManualScoreModalOpen.value) {
+      return ''
+    }
+
+    return manualReason.value.trim() ? '' : 'A reason is required.'
+  })
+
+  function openManualScoreModal(userId: string, applicantName: string, score: number | null) {
+    selectedResumeId.value = userId
+    selectedApplicantName.value = applicantName
+    manualScore.value = score
+    manualReason.value = ''
+    isManualScoreModalOpen.value = true
+  }
+
+  function closeManualScoreModal() {
+    isManualScoreModalOpen.value = false
+    isSavingManualScore.value = false
+    selectedResumeId.value = null
+    selectedApplicantName.value = ''
+    manualScore.value = null
+    manualReason.value = ''
+  }
 
   async function advanceResume(userId: string, applicantName: string) {
     try {
@@ -50,6 +86,17 @@
   }
 
   async function handleRescore(userId: string, applicantName: string) {
+    const resume = newResumes.value.find((item) => item.userId === userId)
+
+    if (
+      resume?.manualScoreReason &&
+      !window.confirm(
+        'Re-scoring will delete the current manual score reason and replace it with the AI result. Continue?'
+      )
+    ) {
+      return
+    }
+
     isRescoring.value = userId
 
     try {
@@ -74,6 +121,59 @@
       })
     } finally {
       isRescoring.value = null
+    }
+  }
+
+  async function saveManualScore() {
+    if (!selectedResumeId.value) {
+      return
+    }
+
+    const nextManualScore = manualScore.value
+
+    if (
+      typeof nextManualScore !== 'number' ||
+      !Number.isInteger(nextManualScore) ||
+      nextManualScore < 1 ||
+      nextManualScore > 10
+    ) {
+      toast.add({
+        title: 'Manual score required',
+        description: 'Enter a whole number from 1 to 10.',
+        color: 'error',
+      })
+      return
+    }
+
+    if (!manualReason.value.trim()) {
+      toast.add({
+        title: 'Reason required',
+        description: 'Provide a reason for the manual score change.',
+        color: 'error',
+      })
+      return
+    }
+
+    isSavingManualScore.value = true
+
+    try {
+      await setManualResumeScore(selectedResumeId.value, nextManualScore, manualReason.value.trim())
+
+      toast.add({
+        title: 'Manual score saved',
+        description: `${selectedApplicantName.value} now has a manual score of ${nextManualScore}/10.`,
+        color: 'success',
+      })
+
+      closeManualScoreModal()
+    } catch (error) {
+      toast.add({
+        title: 'Manual update failed',
+        description:
+          error instanceof Error ? error.message : 'Unable to save the manual score right now.',
+        color: 'error',
+      })
+      isSavingManualScore.value = false
     }
   }
 </script>
@@ -108,6 +208,63 @@
       </div>
 
       <div v-else class="space-y-4">
+        <UModal :open="isManualScoreModalOpen">
+          <template #content>
+            <div class="m-8 space-y-5 text-[var(--ui-text)]">
+              <div class="space-y-1">
+                <h3 class="text-lg font-semibold">Modify score manually</h3>
+                <p class="text-sm text-[var(--ui-text-muted)]">
+                  Update the score for {{ selectedApplicantName }} and record why it changed.
+                </p>
+              </div>
+
+              <UFormField label="Score" required>
+                <UInput
+                  v-model.number="manualScore"
+                  type="number"
+                  :min="1"
+                  :max="10"
+                  :step="1"
+                  :disabled="isSavingManualScore"
+                />
+              </UFormField>
+
+              <UFormField label="Reason" required :error="manualReasonError || undefined">
+                <UTextarea
+                  v-model="manualReason"
+                  :rows="5"
+                  :maxlength="1000"
+                  :disabled="isSavingManualScore"
+                  placeholder="Explain why the AI score was changed."
+                />
+              </UFormField>
+
+              <div
+                v-if="selectedResume?.manualScoreReason"
+                class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+              >
+                Saving a new manual score will replace the current admin reason.
+              </div>
+
+              <div class="flex justify-end gap-2">
+                <UButton
+                  color="neutral"
+                  variant="soft"
+                  label="Cancel"
+                  :disabled="isSavingManualScore"
+                  @click="closeManualScoreModal"
+                />
+                <UButton
+                  color="primary"
+                  label="Save"
+                  :loading="isSavingManualScore"
+                  @click="saveManualScore"
+                />
+              </div>
+            </div>
+          </template>
+        </UModal>
+
         <UCard v-for="resume in newResumes" :key="resume.userId">
           <div class="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-6">
             <div class="space-y-2">
@@ -124,18 +281,33 @@
               <p class="text-sm text-[var(--ui-text-muted)]">
                 Applications: {{ resume.applicationCount }}
               </p>
-              <div
-                v-if="resume.aiSummary"
-                class="max-w-2xl rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-4 py-3"
-              >
-                <p
-                  class="text-xs font-medium tracking-[0.12em] text-[var(--ui-text-muted)] uppercase"
+              <div class="max-w-2xl space-y-3">
+                <div
+                  v-if="resume.aiSummary"
+                  class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-4 py-3"
                 >
-                  AI Reason
-                </p>
-                <p class="mt-2 text-sm leading-6 text-[var(--ui-text)]">
-                  {{ resume.isRescoring ? 'In progress' : resume.aiSummary }}
-                </p>
+                  <p
+                    class="text-xs font-medium tracking-[0.12em] text-[var(--ui-text-muted)] uppercase"
+                  >
+                    AI Reason
+                  </p>
+                  <p class="mt-2 text-sm leading-6 text-[var(--ui-text)]">
+                    {{ resume.isRescoring ? 'In progress' : resume.aiSummary }}
+                  </p>
+                </div>
+                <div
+                  v-if="resume.manualScoreReason && !resume.isRescoring"
+                  class="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-4 py-3"
+                >
+                  <p
+                    class="text-xs font-medium tracking-[0.12em] text-[var(--ui-text-muted)] uppercase"
+                  >
+                    Admin Reason
+                  </p>
+                  <p class="mt-2 text-sm leading-6 text-[var(--ui-text)]">
+                    {{ resume.manualScoreReason }}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -175,6 +347,13 @@
                 :loading="isRescoring === resume.userId"
                 :disabled="resume.applicationCount === 0"
                 @click="handleRescore(resume.userId, resume.applicantName)"
+              />
+              <UButton
+                color="neutral"
+                variant="soft"
+                label="Modify Manually"
+                :disabled="resume.applicationCount === 0 || isRescoring === resume.userId"
+                @click="openManualScoreModal(resume.userId, resume.applicantName, resume.score)"
               />
               <div class="flex flex-wrap justify-end gap-2">
                 <UButton

@@ -10,6 +10,7 @@ export type AdminResumeItem = {
   applicationCount: number
   score: number | null
   aiSummary: string | null
+  manualScoreReason: string | null
   isRescoring?: boolean
 }
 
@@ -18,11 +19,20 @@ type RescoreResumeResponse = {
   userId: string
   score: number | null
   aiSummary: string | null
+  manualScoreReason: string | null
   aiMatchedSkills: string[]
   aiMissingSkills: string[]
   aiConcerns: string[]
   aiScoredAt: string | null
   aiModel: string | null
+}
+
+type ManualScoreResumeResponse = {
+  reviewStatus: AdminResumeReviewStatus
+  userId: string
+  score: number | null
+  aiSummary: string | null
+  manualScoreReason: string | null
 }
 
 type BulkRescoreResponse = {
@@ -157,6 +167,7 @@ export async function useAdminResumes() {
     userId: string,
     score: number | null,
     aiSummary: string | null,
+    manualScoreReason: string | null,
     reviewStatus: AdminResumeReviewStatus
   ) {
     const resume = takeResume(userId)
@@ -172,6 +183,7 @@ export async function useAdminResumes() {
       reviewStatus,
       score,
       aiSummary,
+      manualScoreReason,
       isRescoring: false,
     }
 
@@ -200,7 +212,36 @@ export async function useAdminResumes() {
       method: 'POST',
     })
 
-    updateResumeScore(userId, result.score, result.aiSummary, result.reviewStatus)
+    updateResumeScore(
+      userId,
+      result.score,
+      result.aiSummary,
+      result.manualScoreReason,
+      result.reviewStatus
+    )
+
+    return result
+  }
+
+  async function setManualResumeScore(userId: string, score: number, reason: string) {
+    const result = await $fetch<ManualScoreResumeResponse>(
+      `/api/admin/resumes/${userId}/manual-score`,
+      {
+        method: 'POST',
+        body: {
+          score,
+          reason,
+        },
+      }
+    )
+
+    updateResumeScore(
+      userId,
+      result.score,
+      result.aiSummary,
+      result.manualScoreReason,
+      result.reviewStatus
+    )
 
     return result
   }
@@ -236,6 +277,7 @@ export async function useAdminResumes() {
     getResumeScoreTextClass,
     moveResume,
     rescoreResume,
+    setManualResumeScore,
     rescoreNewResumes,
   }
 }

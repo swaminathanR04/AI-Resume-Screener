@@ -57,5 +57,6 @@ export default defineEventHandler(async (event) => {
     applicationCount: applicant.applications.length,
     score: applicant.applications[0]?.aiScore ?? null,
     aiSummary: applicant.applications[0]?.aiSummary ?? null,
+    manualScoreReason: applicant.applications[0]?.adminScoreReason ?? null,
   }))
 })
