@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { Prisma } from '@prisma/client'
 import { prisma } from '~~/server/utils/prisma'
 import { auth } from '~~/server/utils/auth'
 import { createAuditLogEntry, getAuditActorName } from '~~/server/utils/audit-log'
@@ -11,11 +10,11 @@ const manualScoreSchema = z.object({
 })
 
 function isMissingManualOverrideColumn(error: unknown) {
-  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
+  if (!error || typeof error !== 'object') {
     return false
   }
 
-  return error.code === 'P2022'
+  return 'code' in error && error.code === 'P2022'
 }
 
 export default defineEventHandler(async (event) => {
