@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { Prisma } from '@prisma/client'
 import { prisma } from '~~/server/utils/prisma'
 import { auth } from '~~/server/utils/auth'
 import { createAuditLogEntry, getAuditActorName } from '~~/server/utils/audit-log'
@@ -8,6 +9,14 @@ const manualScoreSchema = z.object({
   score: z.number().int().min(1).max(10),
   reason: z.string().trim().min(1).max(1000),
 })
+
+function isMissingManualOverrideColumn(error: unknown) {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
+    return false
+  }
+
+  return error.code === 'P2022'
+}
 
 export default defineEventHandler(async (event) => {
   const session = await auth.api.getSession({
@@ -83,19 +92,39 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const updatedApplication = await prisma.applicantJobListing.update({
-    where: {
-      applicantInfoId_jobListingId: {
-        applicantInfoId: latestApplication.applicantInfoId,
-        jobListingId: latestApplication.jobListingId,
+  let updatedApplication
+
+  try {
+    updatedApplication = await prisma.applicantJobListing.update({
+      where: {
+        applicantInfoId_jobListingId: {
+          applicantInfoId: latestApplication.applicantInfoId,
+          jobListingId: latestApplication.jobListingId,
+        },
       },
-    },
-    data: {
-      aiScore: parsedBody.data.score,
-      adminScoreReason: parsedBody.data.reason,
-      adminScoreAt: new Date(),
-    },
-  })
+      data: {
+        aiScore: parsedBody.data.score,
+        adminScoreReason: parsedBody.data.reason,
+        adminScoreAt: new Date(),
+      },
+    })
+  } catch (error) {
+    if (!isMissingManualOverrideColumn(error)) {
+      throw error
+    }
+
+    updatedApplication = await prisma.applicantJobListing.update({
+      where: {
+        applicantInfoId_jobListingId: {
+          applicantInfoId: latestApplication.applicantInfoId,
+          jobListingId: latestApplication.jobListingId,
+        },
+      },
+      data: {
+        aiScore: parsedBody.data.score,
+      },
+    })
+  }
 
   await createAuditLogEntry({
     actorType: 'Admin',
@@ -110,6 +139,6 @@ export default defineEventHandler(async (event) => {
     userId,
     score: updatedApplication.aiScore,
     aiSummary: updatedApplication.aiSummary,
-    manualScoreReason: updatedApplication.adminScoreReason,
+    manualScoreReason: updatedApplication.adminScoreReason ?? parsedBody.data.reason,
   }
 })
